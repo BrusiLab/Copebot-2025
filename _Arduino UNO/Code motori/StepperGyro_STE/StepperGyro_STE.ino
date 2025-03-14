@@ -12,13 +12,13 @@ void setup() {
 }
 
 void loop() {
-  robot.turnBothWheels(10, rpm);
+  robot.go(10, rpm, "ahead", "on");
+  robot.go(10, rpm, "back", "off");
+  robot.turn(90, rpm, "right", "ahead");
+  robot.turn(90, rpm, "left", "ahead");
+  robot.turn(90, rpm, "left", "back");
+  robot.turn(90, rpm, "right", "back");
+  robot.turnBothWheels(90, rpm, "right");
+  robot.turnBothWheels(90, rpm, "left");
   delay(500);
 }
-
-
-
-//CONTROLLO SE DOPO 180 GRADI GAMBIA SEGNO ANGOLO
-//VERIFICO SE FUNZIONA PER ANDARE DRITTI
-  //SE FUNZIONE MIGLIORA CODICE (TOGLI I 20 VOID)
-//APPLICO A CURVE
