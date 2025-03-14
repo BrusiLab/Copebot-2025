@@ -95,7 +95,10 @@ float getGyroAngle() {
 
 float PIDControl(float setpoint, float input) {
   float error = setpoint - input;
-  return Kp * error;
+  integral += error;
+  float derivative = error - previousError;
+  previousError = error;
+  return Kp * error + Ki * integral + Kd * derivative;
 }
 
 
