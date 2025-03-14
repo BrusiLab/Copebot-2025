@@ -40,9 +40,15 @@ const int constAcc = 1;
 
 #define tempo_fine 208000
 
+float setpoint = 0;
+float input, output;
+float Kp = 5, Ki = 0.0, Kd = 2;
+float previousError = 0, integral = 0;
+int velocita;
+int counter = 0;
 float angle = 0;
 unsigned long t0 = 0;
-int Kp = 10;
+
 float getGyroAngle();
 float PIDControl(float setpoint, float input);
 
