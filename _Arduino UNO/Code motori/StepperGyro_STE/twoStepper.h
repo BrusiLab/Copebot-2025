@@ -46,10 +46,12 @@ int velocita;
 int counter = 0;
 float angle = 0;
 unsigned long t0 = 0;
+float gyroZ_offset = 0; // Offset iniziale
 
 float getGyroAngle();
 float PIDControl(float setpoint, float input);
 void aggiorna_posizione_angolare(int degree, String wayTurn, String wayTravel);
+void calibrateGyro();
 
 // Define some steppers and the pins the will use
 AccelStepper stepperDX(AccelStepper::DRIVER, STEPPERDX_STEP_PIN, STEPPERDX_DIR_PIN); //motore destro
@@ -77,17 +79,32 @@ class Command {
 
 Command::Command() {}
 
+void calibrateGyro() {
+  Serial.println("Calibrating gyroscope...");
+  float sum = 0;
+  int n = 100; // Numero di campioni per la calibrazione
+  for (int i = 0; i < n; i++) {
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+    sum += g.gyro.z;
+    delay(3); // Piccola pausa per evitare sovraccarico I2C
+  }
+  gyroZ_offset = sum / n;
+  Serial.print("Gyro Z Offset: ");
+  Serial.println(gyroZ_offset, 6);
+}
+
 float getGyroAngle() {
   
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   
   // Calcolo del delta time (in secondi)
-  float dt = (millis() - t0) / 1000.0; // Converti ms in secondi
-  t0 = millis();
+  float dt = (micros() - t0) / 100000.0; // Converti ms in secondi
+  t0 = micros();
 
   // Aggiornamento dell'angolo Z con integrazione
-  angle += g.gyro.z * dt * 57.295779513082320876798154814105; // Converti rad/s in gradi
+  angle += (g.gyro.z - gyroZ_offset) * dt * 57.295779513082320876798154814105; // Converti rad/s in gradi
 
   return angle;
 }
@@ -129,7 +146,9 @@ void Command::set() {
     while (1) yield();
   }
 
-  t0 = millis();
+  calibrateGyro(); // Calibrazione iniziale
+
+  t0 = micros();
 
 }
 
