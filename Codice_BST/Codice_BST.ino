@@ -1,5 +1,12 @@
 #include "lidar.h"
 
+#include "twoStepper.h" //stepper ruote
+#include "Wire.h" //comunicazione I2C per sensori
+
+Command robot = Command();  //creazione oggetto master (gestione motori)
+
+int rpm = 800;
+
 #define t1 50          // Tempo di lampeggio
 #define rileva_colore "colore"
 
@@ -22,6 +29,7 @@ void setup() {
   
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
+  robot.set();
   
 }
 
