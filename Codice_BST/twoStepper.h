@@ -8,7 +8,7 @@
 #ifndef twoStepper_h
 #define twoStepper_h
 
-#define Gyro_curva
+#define Gyro_curva //da definire se si vuole usare il giroscopio nelle curve
 
 float posizione_angolare = 0;
 
@@ -52,19 +52,12 @@ float getGyroAngle();
 float PIDControl(float setpoint, float input);
 void aggiorna_posizione_angolare(int degree, String wayTurn, String wayTravel);
 void calibrateGyro();
+void controlla_blocco();
+void interrompi();
 
 // Define some steppers and the pins the will use
 AccelStepper stepperDX(AccelStepper::DRIVER, STEPPERDX_STEP_PIN, STEPPERDX_DIR_PIN); //motore destro
 AccelStepper stepperSX(AccelStepper::DRIVER, STEPPERSX_STEP_PIN, STEPPERSX_DIR_PIN); //motore sinistro
-
-
-// Funzione per far interrompere il robot allo scadere del tempo
-void interrompi() {
-  if (millis() >= tempo_fine) {
-    Serial.println("finito");
-    while (true) {}
-  }
-}
 
 // classe
 class Command {
@@ -72,61 +65,13 @@ class Command {
     Command();
 
     void set();
-    void go(int lenght, int rpm, String wayTravel, String accel);
+    void go(int lenght, int rpm, String wayTravel, bool accel, bool blocchi = false);
     void turn(int degree, int rpm, String wayTurn, String wayTravel);
     void turnBothWheels(int degree, int rpm, String wayTurn, String wayTravel = "ahead");
+    void go_i();
 };
 
 Command::Command() {}
-
-void calibrateGyro() {
-  Serial.println("Calibrating gyroscope...");
-  float sum = 0;
-  int n = 100; // Numero di campioni per la calibrazione
-  for (int i = 0; i < n; i++) {
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-    sum += g.gyro.z;
-    delay(3); // Piccola pausa per evitare sovraccarico I2C
-  }
-  gyroZ_offset = sum / n;
-  Serial.print("Gyro Z Offset: ");
-  Serial.println(gyroZ_offset, 6);
-}
-
-float getGyroAngle() {
-
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
-
-  // Calcolo del delta time (in secondi)
-  float dt = (micros() - t0) / 100000.0; // Converti ms in secondi
-  t0 = micros();
-
-  // Aggiornamento dell'angolo Z con integrazione
-  angle += (g.gyro.z - gyroZ_offset) * dt * 57.295779513082320876798154814105; // Converti rad/s in gradi
-
-  return angle;
-}
-
-float PIDControl(float setpoint, float input) {
-  float error = setpoint - input;
-  integral += error;
-  float derivative = error - previousError;
-  previousError = error;
-  return Kp * error + Ki * integral + Kd * derivative;
-}
-
-void aggiorna_posizione_angolare(int degree, String wayTurn, String wayTravel){
-
-  if((wayTravel == "ahead" && wayTurn == "right") | (wayTravel == "back" && wayTurn == "left")) {
-    posizione_angolare += degree;
-  }
-  if ((wayTravel == "back" && wayTurn == "right") | (wayTravel == "ahead" && wayTurn == "left")) {
-    posizione_angolare -= degree;
-  }
-
-}
 
 // ==================================================
 //                      SETTING
@@ -152,7 +97,6 @@ void Command::set() {
 
 }
 
-
 unsigned long stride;
 int steps = 0; // variabile direzionale
 int savePos;
@@ -161,7 +105,7 @@ int savePos;
 //                        GO
 // ==================================================
 
-void Command::go(int lenght, int rpm, String wayTravel, String accel) {
+void Command::go(int lenght, int rpm, String wayTravel, bool accel, bool blocchi = false) {
 
   if (wayTravel == "ahead") {
     steps = 1; // mantieni direzione invariata
@@ -169,7 +113,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     steps = -1; // inverti direzione
   }
 
-  if (accel == "on") {
+  if (accel == true) {
     //Serial.println("1");
     //Serial.println(abs(lenght) / (PI * diameterWheels)* stepsPerLap);
     stepperDX.setCurrentPosition(0);
@@ -188,29 +132,33 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     //Serial.println(stride);
 
     stepperDX.setCurrentPosition(0); // imposta come 0 la posizione di partenza
-    bool controll = true;
+    output = 0;
 
     //raggiungi posizione da lunghezza calcolata
     while (abs(stepperDX.currentPosition()) != (stride * MICROSTEPS)) {
-      if (controll == true) {
-        stepperDX.setSpeed(velocita);
-        stepperSX.setSpeed(velocita);
-      }
+   
       if (counter == 100) {
         output = PIDControl(posizione_angolare, getGyroAngle()); //imposto setpoint e input
         counter = 0;
-        controll = false;
       }
+      
       stepperDX.setSpeed(velocita + output); //correggo le velocità in base a errore
       stepperSX.setSpeed(velocita - output);
       stepperDX.runSpeed();
       stepperSX.runSpeed();
+
+      if(counter % 4 == 0){
+        controlla_blocco();
+      }
+      
       counter++;
+      
     }
 
     counter = 0;
 
     stepperDX.setCurrentPosition(0);
+    
     for (int i = rpm; i > 300; i -= constAcc) {
       stepperDX.move(1);
       stepperSX.move(1);
@@ -221,7 +169,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     }
     savePos += stepperDX.currentPosition();
 
-  } else if (accel == "off") {
+  } else if (accel == false) {
 
     // velocità motori
     velocita = rpm * steps;
@@ -230,23 +178,25 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     stride = abs(lenght) / (PI * diameterWheels) * stepsPerLap;
     // imposta come 0 la posizione di partenza
     stepperDX.setCurrentPosition(0);
-    bool controll = true;
+    output = 0;
 
     //raggiungi posizione da lunghezza calcolata
     while (abs(stepperDX.currentPosition()) != (stride * MICROSTEPS)) {
-      if (controll == true) {
-        stepperDX.setSpeed(velocita);
-        stepperSX.setSpeed(velocita);
-      }
+      
       if (counter == 100) {
         output = PIDControl(posizione_angolare, getGyroAngle()); //imposto setpoint e input
         counter = 0;
-        controll = false;
       }
+      
       stepperDX.setSpeed(velocita + output); //correggo le velocità in base a errore
       stepperSX.setSpeed(velocita - output);
       stepperDX.runSpeed();
       stepperSX.runSpeed();
+      
+      if(counter % 4 == 0){
+        controlla_blocco();
+      }
+      
       counter++;
     }
 

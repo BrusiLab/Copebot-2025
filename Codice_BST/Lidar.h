@@ -11,13 +11,13 @@ class Lidar {
   public:
   Lidar();
 
-  int misura();
+  bool misura();
 
 };
 
 Lidar::Lidar() {}
 
-int Lidar::misura(){
+bool Lidar::misura(){
 
   tempo = pulseIn(pinlidar, HIGH);    //rileva tempo di volo
   
@@ -26,6 +26,12 @@ int Lidar::misura(){
   } else {                            //se intervallo ragionevole
     distanza = (tempo - 1000) * 1/4;  //calcola la distanza (3/4)
     distanza = distanza/10;           //distanza in cm
+  }
+
+  if(distanza >= 0 && distanza < 5){
+    return true;
+  } else {
+    return false;
   }
 
   return distanza;

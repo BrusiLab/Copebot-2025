@@ -1,16 +1,12 @@
 #include "lidar.h"
-
 #include "twoStepper.h" //stepper ruote
 #include "Wire.h" //comunicazione I2C per sensori
-
-Command robot = Command();  //creazione oggetto master (gestione motori)
-
-int rpm = 800;
 
 #define t1 50          // Tempo di lampeggio
 #define rileva_colore "colore"
 
 Lidar lidar = Lidar(); //Sensore di distanza
+Command robot = Command();  //creazione oggetto master (gestione motori)
 
 String ricevi();
 void invia(String line);
@@ -24,6 +20,7 @@ int dt1;
 long tp1;
 long i = 0;
 String thekolors;
+int rpm = 800;
 
 void setup() {
   
@@ -35,7 +32,7 @@ void setup() {
 
 void loop() {
 
-  if(lidar.misura() >= 0 && lidar.misura() < 5){
+  if(lidar.misura()){
     invia(rileva_colore);
     thekolors = ricevi();
   }
@@ -45,3 +42,5 @@ void loop() {
   }
 
 }
+
+//INOLTRE IL ROBOT DEVE RILEVARE LA DISTANZA MENTRE SI MUOVE
