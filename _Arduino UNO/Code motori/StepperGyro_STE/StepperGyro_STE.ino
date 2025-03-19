@@ -7,7 +7,7 @@ Command robot = Command();  //creazione oggetto master (gestione motori)
 int rpm = 800;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   robot.set();
 }
 

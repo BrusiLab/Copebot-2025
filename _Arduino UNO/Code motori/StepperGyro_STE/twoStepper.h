@@ -45,7 +45,7 @@ float previousError = 0, integral = 0;
 int velocita;
 int counter = 0;
 float angle = 0;
-unsigned long t0 = 0;
+unsigned long t0,t1 = 0;
 float gyroZ_offset = 0; // Offset iniziale
 
 float getGyroAngle();
@@ -99,14 +99,22 @@ float getGyroAngle() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   
+  t1 = micros();
+  
   // Calcolo del delta time (in secondi)
-  float dt = (micros() - t0) / 100000.0; // Converti ms in secondi
-  t0 = micros();
+  float dt = (micros() - t0) / 1000000.0; // Converti ms in secondi
+
+  t0=t1;
 
   // Aggiornamento dell'angolo Z con integrazione
-  angle += (g.gyro.z - gyroZ_offset) * dt * 57.295779513082320876798154814105; // Converti rad/s in gradi
+  angle += (g.gyro.z - gyroZ_offset) * dt * 57.2957795; // Converti rad/s in gradi
 
+  Serial.println(angle);
+
+  delay(1);
+  
   return angle;
+  
 }
 
 float PIDControl(float setpoint, float input) {
@@ -118,13 +126,15 @@ float PIDControl(float setpoint, float input) {
 }
 
 void aggiorna_posizione_angolare(int degree, String wayTurn, String wayTravel){
-
+    
   if((wayTravel == "ahead" && wayTurn == "right") | (wayTravel == "back" && wayTurn == "left")) {
-    posizione_angolare += degree;
-  }
-  if ((wayTravel == "back" && wayTurn == "right") | (wayTravel == "ahead" && wayTurn == "left")) {
     posizione_angolare -= degree;
   }
+  if ((wayTravel == "back" && wayTurn == "right") | (wayTravel == "ahead" && wayTurn == "left")) {
+    posizione_angolare += degree;
+  }
+
+  Serial.println(posizione_angolare);
   
 }
 
@@ -287,7 +297,7 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
 #ifdef Gyro_curva
 
     while(true){
-      if(posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5){
+      if(posizione_angolare - 1 <= getGyroAngle() <= posizione_angolare + 0.5){
         break;
       }
 
@@ -311,7 +321,7 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
     #ifdef Gyro_curva
 
     while(true){
-      if(posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5){
+      if(posizione_angolare - 1 <= getGyroAngle() <= posizione_angolare + 0.5){
         break;
       }
 
@@ -362,7 +372,7 @@ void Command::turnBothWheels(int degree, int rpm, String wayTurn, String wayTrav
 #ifdef Gyro_curva
 
     while(true){
-      if(posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5){
+      if(posizione_angolare - 1 <= getGyroAngle() <= posizione_angolare + 0.5){
         break;
       }
 
@@ -388,7 +398,7 @@ void Command::turnBothWheels(int degree, int rpm, String wayTurn, String wayTrav
     #ifdef Gyro_curva
 
     while(true){
-      if(posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5){
+      if(posizione_angolare - 1 <= getGyroAngle() <= posizione_angolare + 0.5){
         break;
       }
 

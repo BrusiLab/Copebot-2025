@@ -22,7 +22,7 @@ void calibrateGyro() {
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
     sum += g.gyro.z;
-    delay(3); // Piccola pausa per evitare sovraccarico I2C
+    delay(2); // Piccola pausa per evitare sovraccarico I2C
   }
   gyroZ_offset = sum / n;
   Serial.print("Gyro Z Offset: ");
@@ -31,18 +31,26 @@ void calibrateGyro() {
 
 //calcola l'angolo
 float getGyroAngle() {
-
+  
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-
+  
+  t1 = micros();
+  
   // Calcolo del delta time (in secondi)
-  float dt = (micros() - t0) / 100000.0; // Converti micros in secondi
-  t0 = micros();
+  float dt = (micros() - t0) / 1000000.0; // Converti ms in secondi
+
+  t0=t1;
 
   // Aggiornamento dell'angolo Z con integrazione
-  angle += (g.gyro.z - gyroZ_offset) * dt * 57.295779513082320876798154814105; // Converti rad/s in gradi
+  angle += (g.gyro.z - gyroZ_offset) * dt * 57.2957795; // Converti rad/s in gradi
 
+  Serial.println(angle);
+
+  delay(1);
+  
   return angle;
+  
 }
 
 //calcola variazione velocità per raddrizzare robot
@@ -56,16 +64,16 @@ float PIDControl(float setpoint, float input) {
 
 //memorizzazione della direzione in cui dovrebbe andare il robot
 void aggiorna_posizione_angolare(int degree, String wayTurn, String wayTravel){
-
-  //in un senso angolo positivo, nell'altro negativo
-
+    
   if((wayTravel == "ahead" && wayTurn == "right") | (wayTravel == "back" && wayTurn == "left")) {
-    posizione_angolare += degree;
-  }
-  if ((wayTravel == "back" && wayTurn == "right") | (wayTravel == "ahead" && wayTurn == "left")) {
     posizione_angolare -= degree;
   }
+  if ((wayTravel == "back" && wayTurn == "right") | (wayTravel == "ahead" && wayTurn == "left")) {
+    posizione_angolare += degree;
+  }
 
+  Serial.println(posizione_angolare);
+  
 }
 
 // Funzione per far interrompere il robot allo scadere del tempo
