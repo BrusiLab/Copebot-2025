@@ -177,12 +177,12 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     for (int i = 300; i < rpm; i += constAcc) {
       stepperDX.move(1);
       stepperSX.move(1);
-      stepperDX.setSpeed(velocita);
-      stepperSX.setSpeed(velocita);
+      stepperDX.setSpeed(i);
+      stepperSX.setSpeed(i);
       stepperDX.runSpeed();
       stepperSX.runSpeed();
     }
-    savePos = stepperDX.currentPosition();
+    savePos = abs(stepperDX.currentPosition());
 
     stride = abs(lenght) / (PI * diameterWheels) * stepsPerLap - savePos * 2 / MICROSTEPS;
     //Serial.println(stride);
