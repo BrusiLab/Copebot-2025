@@ -25,7 +25,11 @@ Adafruit_MPU6050 mpu;
 // Definizione valori costanti
 #define MICROSTEPS 4 // MICROSTEPSs per ogni passo
 #define stepsPerLap 200 // passi interi per lap
+<<<<<<< Updated upstream
 #define diameterWheels 6.5  // diametro ruote in cm
+=======
+#define diameterWheels 6.6  // diametro ruote in cm
+>>>>>>> Stashed changes
 #define distanceWheels 16.5   // distanza tra le ruote in cm
 const int constAcc = 1;
 
@@ -76,7 +80,7 @@ Command::Command() {}
 // ==================================================
 //tutti i valori si devono intendere come passi/secondo --> il numero di passi del motore è 3200 (200*16)
 void Command::set() {
-  
+
   stepperDX.setMaxSpeed(4000.0);
   stepperSX.setMaxSpeed(4000.0);
 
@@ -105,7 +109,7 @@ int savePos;
 // ==================================================
 
 void Command::go(int lenght, int rpm, String wayTravel, String accel) {
-  
+
   if (wayTravel == "ahead") {
     steps = 1; // mantieni direzione invariata
   } else if (wayTravel == "back") {
@@ -113,15 +117,15 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
   }
 
   if (accel == "on") {
-    //Serial.println("1");
-    //Serial.println(abs(lenght) / (PI * diameterWheels)* stepsPerLap);
+
     stepperDX.setCurrentPosition(0);
     velocita = rpm * steps;
+
     for (int i = 100; i < rpm; i += constAcc) {
       stepperDX.move(1);
       stepperSX.move(1);
-      stepperDX.setSpeed(i*steps);
-      stepperSX.setSpeed(i*steps);
+      stepperDX.setSpeed(i * steps);
+      stepperSX.setSpeed(i * steps);
       stepperDX.runSpeed();
       stepperSX.runSpeed();
     }
@@ -129,7 +133,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
 
     stride = abs(lenght) / (PI * diameterWheels) * stepsPerLap;
     //Serial.println(stride);
-    
+
     stepperDX.setCurrentPosition(0); // imposta come 0 la posizione di partenza
     output = 0;
 
@@ -196,13 +200,13 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
 void Command::turn(int degree, int rpm, String wayTurn, String wayTravel="ahead") {
 
   aggiorna_posizione_angolare(degree, wayTurn, wayTravel);
-  
+
   //converti misura in deg in radianti (arduino utilizza i radianti)
   float rad = abs(degree) * 17.453292519943 / 1000;
-  
+
   // calcola la distanza che la ruota deve percorrere
   int lenght = rad * distanceWheels;
-  
+
   //calcola i passi che lo stepper deve compiere
   unsigned long stride = abs(lenght) / (PI * diameterWheels) * stepsPerLap;
 
@@ -230,7 +234,7 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel="ahead"
       }
 
 #else
-      
+
     while (abs(stepperSX.currentPosition()) != (stride * MICROSTEPS)) {
 
 #endif
