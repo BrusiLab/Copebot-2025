@@ -26,7 +26,6 @@ Adafruit_MPU6050 mpu;
 #define MICROSTEPS 4 // MICROSTEPSs per ogni passo
 #define stepsPerLap 200 // passi interi per lap
 #define diameterWheels 6.6  // diametro ruote in cm
->>>>>>> Stashed changes
 #define distanceWheels 16.5   // distanza tra le ruote in cm
 const int constAcc = 1;
 
@@ -194,7 +193,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
 // ==================================================
 
 //funzione per sterzare con una sola ruota (l'altra fa da perno)
-void Command::turn(int degree, int rpm, String wayTurn, String wayTravel="ahead") {
+void Command::turn(int degree, int rpm, String wayTurn, String wayTravel = "ahead") {
 
   aggiorna_posizione_angolare(degree, wayTurn, wayTravel);
 
