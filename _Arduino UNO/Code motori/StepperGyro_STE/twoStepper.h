@@ -8,7 +8,7 @@
 #ifndef twoStepper_h
 #define twoStepper_h
 
-#define Gyro_curva
+//#define Gyro_curva
 
 float posizione_angolare = 0;
 
@@ -45,26 +45,18 @@ float previousError = 0, integral = 0;
 int velocita;
 int counter = 0;
 float angle = 0;
-unsigned long t0,t1 = 0;
+unsigned long t0, t1 = 0;
 float gyroZ_offset = 0; // Offset iniziale
 
 float getGyroAngle();
 float PIDControl(float setpoint, float input);
 void aggiorna_posizione_angolare(int degree, String wayTurn, String wayTravel);
 void calibrateGyro();
+void interrompi();
 
 // Define some steppers and the pins the will use
 AccelStepper stepperDX(AccelStepper::DRIVER, STEPPERDX_STEP_PIN, STEPPERDX_DIR_PIN); //motore destro
 AccelStepper stepperSX(AccelStepper::DRIVER, STEPPERSX_STEP_PIN, STEPPERSX_DIR_PIN); //motore sinistro
-
-
-// Funzione per far interrompere il robot allo scadere del tempo
-void interrompi() {
-  if (millis() >= tempo_fine) {
-    Serial.println("finito");
-    while (true) {}
-  }
-}
 
 // classe
 class Command {
@@ -73,70 +65,11 @@ class Command {
 
     void set();
     void go(int lenght, int rpm, String wayTravel, String accel);
-    void turn(int degree, int rpm, String wayTurn, String wayTravel);
+    void turn(int degree, int rpm, String wayTurn, String wayTravel = "ahead");
     void turnBothWheels(int degree, int rpm, String wayTurn, String wayTravel = "ahead");
 };
 
 Command::Command() {}
-
-void calibrateGyro() {
-  Serial.println("Calibrating gyroscope...");
-  float sum = 0;
-  int n = 100; // Numero di campioni per la calibrazione
-  for (int i = 0; i < n; i++) {
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-    sum += g.gyro.z;
-    delay(3); // Piccola pausa per evitare sovraccarico I2C
-  }
-  gyroZ_offset = sum / n;
-  Serial.print("Gyro Z Offset: ");
-  Serial.println(gyroZ_offset, 6);
-}
-
-float getGyroAngle() {
-  
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
-  
-  t1 = micros();
-  
-  // Calcolo del delta time (in secondi)
-  float dt = (micros() - t0) / 1000000.0; // Converti ms in secondi
-
-  t0=t1;
-
-  // Aggiornamento dell'angolo Z con integrazione
-  angle += (g.gyro.z - gyroZ_offset) * dt * 57.2957795; // Converti rad/s in gradi
-
-  Serial.println(angle);
-
-  delay(1);
-  
-  return angle;
-  
-}
-
-float PIDControl(float setpoint, float input) {
-  float error = setpoint - input;
-  integral += error;
-  float derivative = error - previousError;
-  previousError = error;
-  return Kp * error + Ki * integral + Kd * derivative;
-}
-
-void aggiorna_posizione_angolare(int degree, String wayTurn, String wayTravel){
-    
-  if((wayTravel == "ahead" && wayTurn == "right") | (wayTravel == "back" && wayTurn == "left")) {
-    posizione_angolare -= degree + 0.8;
-  }
-  if ((wayTravel == "back" && wayTurn == "right") | (wayTravel == "ahead" && wayTurn == "left")) {
-    posizione_angolare += degree - 0.8;
-  }
-
-  Serial.println(posizione_angolare);
-  
-}
 
 // ==================================================
 //                      SETTING
@@ -194,19 +127,14 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     }
     savePos = abs(stepperDX.currentPosition());
 
-    stride = abs(lenght) / (PI * diameterWheels) * stepsPerLap - savePos * 2 / MICROSTEPS;
+    stride = abs(lenght) / (PI * diameterWheels) * stepsPerLap;
     //Serial.println(stride);
     
     stepperDX.setCurrentPosition(0); // imposta come 0 la posizione di partenza
-    bool controll = true;
+    output = 0;
 
     //raggiungi posizione da lunghezza calcolata
-    while (abs(stepperDX.currentPosition()) <= (stride * MICROSTEPS)) {
-      if (controll == true) {
-        stepperDX.setSpeed(velocita);
-        stepperSX.setSpeed(velocita);
-         controll = false;
-      }
+    while (abs(stepperDX.currentPosition()) != (stride * MICROSTEPS - savePos)) {
       if (counter == 100) {
         output = PIDControl(posizione_angolare, getGyroAngle()); //imposto setpoint e input
         counter = 0;
@@ -240,18 +168,14 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     stride = abs(lenght) / (PI * diameterWheels) * stepsPerLap;
     // imposta come 0 la posizione di partenza
     stepperDX.setCurrentPosition(0);
-    bool controll = true;
+
+    output = 0;
 
     //raggiungi posizione da lunghezza calcolata
-    while (abs(stepperDX.currentPosition()) <= (stride * MICROSTEPS)) {
-      if (controll == true) {
-        stepperDX.setSpeed(velocita);
-        stepperSX.setSpeed(velocita);
-      }
+    while (abs(stepperDX.currentPosition()) != (stride * MICROSTEPS)) {
       if (counter == 100) {
         output = PIDControl(posizione_angolare, getGyroAngle()); //imposto setpoint e input
         counter = 0;
-        controll = false;
       }
       stepperDX.setSpeed(velocita + output); //correggo le velocità in base a errore
       stepperSX.setSpeed(velocita - output);
@@ -269,8 +193,8 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
 // ==================================================
 
 //funzione per sterzare con una sola ruota (l'altra fa da perno)
-void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
-  
+void Command::turn(int degree, int rpm, String wayTurn, String wayTravel="ahead") {
+
   aggiorna_posizione_angolare(degree, wayTurn, wayTravel);
   
   //converti misura in deg in radianti (arduino utilizza i radianti)
@@ -291,13 +215,17 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
     steps = -1; //inverti la direzione
   }
 
+  Serial.println(steps);
+
+  velocita = rpm * steps;
+
   if (wayTurn == "right") {
     stepperSX.setCurrentPosition(0);
 
 #ifdef Gyro_curva
 
-    while(true){
-      if(posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5){
+    while (true) {
+      if (posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5) {
         break;
       }
 
@@ -308,31 +236,35 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
 #endif
 
       interrompi();
-      stepperSX.setSpeed(rpm * steps);
+      stepperSX.setSpeed(velocita);
+      stepperDX.setSpeed(2);
       stepperSX.runSpeed();
+      stepperDX.runSpeed();
       interrompi();
     }
   }
 
-  
+
   if (wayTurn == "left") {
     stepperDX.setCurrentPosition(0);
 
-    #ifdef Gyro_curva
+#ifdef Gyro_curva
 
-    while(true){
-      if(posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5){
+    while (true) {
+      if (posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5) {
         break;
       }
 
 #else
-      
+
     while (abs(stepperSX.currentPosition()) != (stride * MICROSTEPS)) {
 
 #endif
-    
+
       interrompi();
-      stepperDX.setSpeed(rpm * steps);
+      stepperDX.setSpeed(velocita);
+      stepperSX.setSpeed(2);
+      stepperSX.runSpeed();
       stepperDX.runSpeed();
       interrompi();
     }
@@ -345,15 +277,15 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
 
 //funzione per sterzare con entrambe le ruote (il centro dell'asse posteriore resta fermo)
 void Command::turnBothWheels(int degree, int rpm, String wayTurn, String wayTravel = "ahead") {
-  
+
   aggiorna_posizione_angolare(degree, wayTurn, wayTravel);
 
   //converti misura in deg in radianti (arduino utilizza i radianti)
   float rad = abs(degree) * 17.453292519943 / 1000;
-  
+
   // calcola la distanza che la ruota deve percorrere
-  int lenght = rad * distanceWheels/2;
-  
+  int lenght = rad * distanceWheels / 2;
+
   //calcola i passi che lo stepper deve compiere
   unsigned long stride = abs(lenght) / (PI * diameterWheels) * stepsPerLap;
 
@@ -371,46 +303,46 @@ void Command::turnBothWheels(int degree, int rpm, String wayTurn, String wayTrav
 
 #ifdef Gyro_curva
 
-    while(true){
-      if(posizione_angolare - 0.1 <= getGyroAngle() <= posizione_angolare + 0.1){
+    while (true) {
+      if (posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5) {
         break;
       }
 
 #else
-      
+
     while (abs(stepperSX.currentPosition()) != (stride * MICROSTEPS)) {
 
 #endif
 
       interrompi();
       stepperSX.setSpeed(rpm * steps);
-      stepperDX.setSpeed(-rpm * steps);
+      stepperDX.setSpeed(-1 * rpm * steps);
       stepperSX.runSpeed();
       stepperDX.runSpeed();
       interrompi();
     }
   }
 
-  
+
   if (wayTurn == "left") {
     stepperDX.setCurrentPosition(0);
 
-    #ifdef Gyro_curva
+#ifdef Gyro_curva
 
-    while(true){
-      if(posizione_angolare - 0.1 <= getGyroAngle() <= posizione_angolare + 0.1){
+    while (true) {
+      if (posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5) {
         break;
       }
 
 #else
-      
+
     while (abs(stepperSX.currentPosition()) != (stride * MICROSTEPS)) {
 
 #endif
-    
+
       interrompi();
       stepperDX.setSpeed(rpm * steps);
-      stepperSX.setSpeed(-rpm * steps);
+      stepperSX.setSpeed(-1 * rpm * steps);
       stepperDX.runSpeed();
       stepperSX.runSpeed();
       interrompi();

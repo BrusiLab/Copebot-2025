@@ -12,13 +12,14 @@ void setup() {
 }
 
 void loop() {
-  robot.go(10, rpm, "ahead", "on");
-  robot.go(10, rpm, "back", "off");
-  robot.turn(90, rpm, "right", "ahead");
-  robot.turn(90, rpm, "left", "ahead");
-  robot.turn(90, rpm, "left", "back");
-  robot.turn(90, rpm, "right", "back");
-  robot.turnBothWheels(90, rpm, "right");
-  robot.turnBothWheels(90, rpm, "left");
-  delay(50000);
+  //robot.go(10, rpm, "ahead", "on");
+  //robot.go(10, rpm, "back", "off");
+  //robot.turn(90, rpm, "right", "ahead");
+  //robot.turn(90, rpm, "left", "ahead");
+  //robot.turn(90, rpm, "left", "back");
+  //robot.turn(90, rpm, "right", "back");
+  //robot.turnBothWheels(90, rpm, "right");
+  //robot.turnBothWheels(90, rpm, "left");*/
+
+  delay(10000);
 }
