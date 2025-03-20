@@ -15,7 +15,7 @@
 #define MICROSTEPS 4 // MICROSTEPSs per ogni passo
 #define stepsPerLap 200 // passi interi per lap
 #define diameterWheels 65  // diametro ruote in cm
-#define distanceWheels 25   // distanza tra le ruote in cm
+#define distanceWheels 16   // distanza tra le ruote in cm
 const int constAcc = 1;
 
 // The DX Stepper pins
