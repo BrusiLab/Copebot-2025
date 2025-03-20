@@ -25,8 +25,8 @@ Adafruit_MPU6050 mpu;
 // Definizione valori costanti
 #define MICROSTEPS 4 // MICROSTEPSs per ogni passo
 #define stepsPerLap 200 // passi interi per lap
-#define diameterWheels 65  // diametro ruote in cm
-#define distanceWheels 25   // distanza tra le ruote in cm
+#define diameterWheels 6.1  // diametro ruote in cm
+#define distanceWheels 16.5   // distanza tra le ruote in cm
 const int constAcc = 1;
 
 // The DX Stepper pins
@@ -201,7 +201,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     bool controll = true;
 
     //raggiungi posizione da lunghezza calcolata
-    while (abs(stepperDX.currentPosition()) != (stride * MICROSTEPS)) {
+    while (abs(stepperDX.currentPosition()) <= (stride * MICROSTEPS)) {
       if (controll == true) {
         stepperDX.setSpeed(velocita);
         stepperSX.setSpeed(velocita);
@@ -243,7 +243,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     bool controll = true;
 
     //raggiungi posizione da lunghezza calcolata
-    while (abs(stepperDX.currentPosition()) != (stride * MICROSTEPS)) {
+    while (abs(stepperDX.currentPosition()) <= (stride * MICROSTEPS)) {
       if (controll == true) {
         stepperDX.setSpeed(velocita);
         stepperSX.setSpeed(velocita);
@@ -297,7 +297,7 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
 #ifdef Gyro_curva
 
     while(true){
-      if(posizione_angolare - 0.1 <= getGyroAngle() <= posizione_angolare + 0.1){
+      if(posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5){
         break;
       }
 
@@ -321,7 +321,7 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
     #ifdef Gyro_curva
 
     while(true){
-      if(posizione_angolare - 0.1 <= getGyroAngle() <= posizione_angolare + 0.1){
+      if(posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5){
         break;
       }
 

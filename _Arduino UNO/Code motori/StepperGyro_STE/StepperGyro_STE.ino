@@ -20,5 +20,5 @@ void loop() {
   robot.turn(90, rpm, "right", "back");
   robot.turnBothWheels(90, rpm, "right");
   robot.turnBothWheels(90, rpm, "left");
-  delay(500);
+  delay(50000);
 }
