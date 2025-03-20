@@ -25,9 +25,6 @@ Adafruit_MPU6050 mpu;
 // Definizione valori costanti
 #define MICROSTEPS 4 // MICROSTEPSs per ogni passo
 #define stepsPerLap 200 // passi interi per lap
-<<<<<<< Updated upstream
-#define diameterWheels 6.5  // diametro ruote in cm
-=======
 #define diameterWheels 6.6  // diametro ruote in cm
 >>>>>>> Stashed changes
 #define distanceWheels 16.5   // distanza tra le ruote in cm
