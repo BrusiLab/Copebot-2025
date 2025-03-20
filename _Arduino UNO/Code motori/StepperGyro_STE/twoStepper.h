@@ -184,11 +184,11 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     //Serial.println(abs(lenght) / (PI * diameterWheels)* stepsPerLap);
     stepperDX.setCurrentPosition(0);
     velocita = rpm * steps;
-    for (int i = 300; i < rpm; i += constAcc) {
+    for (int i = 100; i < rpm; i += constAcc) {
       stepperDX.move(1);
       stepperSX.move(1);
-      stepperDX.setSpeed(i);
-      stepperSX.setSpeed(i);
+      stepperDX.setSpeed(i*steps);
+      stepperSX.setSpeed(i*steps);
       stepperDX.runSpeed();
       stepperSX.runSpeed();
     }
@@ -205,11 +205,11 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
       if (controll == true) {
         stepperDX.setSpeed(velocita);
         stepperSX.setSpeed(velocita);
+         controll = false;
       }
       if (counter == 100) {
         output = PIDControl(posizione_angolare, getGyroAngle()); //imposto setpoint e input
         counter = 0;
-        controll = false;
       }
       stepperDX.setSpeed(velocita + output); //correggo le velocità in base a errore
       stepperSX.setSpeed(velocita - output);
@@ -221,7 +221,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     counter = 0;
 
     stepperDX.setCurrentPosition(0);
-    for (int i = rpm; i > 300; i -= constAcc) {
+    for (int i = rpm; i > 100; i -= constAcc) {
       stepperDX.move(1);
       stepperSX.move(1);
       stepperDX.setSpeed(i * steps); // la velocità è negativa o positiva in base alla direzione
