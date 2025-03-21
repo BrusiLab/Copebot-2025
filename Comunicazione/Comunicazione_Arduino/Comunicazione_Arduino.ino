@@ -14,8 +14,11 @@ void setup() {
 }
 
 void loop() {
-  String msg = ricevi();
-  if (msg == "Hello from Raspberry Pi!") {
-    invia("Done");
+  invia("rileva");
+  if(ricevi() == "rosso"){
+    invia("top");
+  } else {
+    invia("sbagliato");
   }
+  delay(7500);
 }
