@@ -243,7 +243,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     output = 0;
 
     // ---------- Movimento a velcoità costante ----------
-    while (abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition()) != (stride * MICROSTEPS*2)) {
+    while (abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition()) != (stride * MICROSTEPS * 2)) {
       // Calcola l'errore ogni 100 microsteps
       if (counter == 100) {
         getGyroAngle();
@@ -288,7 +288,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     counter = 0;
 
     // raggiungi posizione da lunghezza calcolata
-    while (abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition()) != (stride * MICROSTEPS*2)) {
+    while (abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition()) != (stride * MICROSTEPS * 2)) {
       // Calcola errore ogni 100 microsteps
       if (counter == 100) {
         getGyroAngle();
@@ -359,8 +359,19 @@ void Command::turnBothWheels(int degree, int rpm) {
   int angoloSet = angoloMisura;
   // Calcola angolo giroscopio
   getGyroAngle();
+  int valueAngolo = degree + angoloSet;
+  
+  if (valueAngolo >= 180) {
+    valueAngolo = -180 + abs(valueAngolo % 180);
+    rpm = -rpm;
+  }
+  if (valueAngolo < -180) {
+    valueAngolo = 180 - abs(valueAngolo % 180);
+    rpm = -rpm;
+  }
+  Serial.println(valueAngolo);
   // angoloMisura = angolo misurato dal giroscipio
-  while (angoloMisura > (degree + angoloSet)) {
+  while (angoloMisura > valueAngolo) {
     getGyroAngle();
     Serial.println(angoloMisura);
     stepperDX.move(1);
@@ -374,7 +385,7 @@ void Command::turnBothWheels(int degree, int rpm) {
     stepperSX.stop();
   }
 
-  while (angoloMisura < (degree + angoloSet)) {
+  while (angoloMisura < valueAngolo) {
     getGyroAngle();
     Serial.println(angoloMisura);
     stepperDX.move(1);
