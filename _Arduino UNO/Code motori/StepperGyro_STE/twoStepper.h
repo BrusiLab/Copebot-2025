@@ -296,7 +296,7 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel = "ahea
 #ifdef Gyro_curva
 
     while (true) {
-      if (posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5) {
+      if (posizione_angolare - 0.5 <= getGyroAngle() && getGyroAngle() <= posizione_angolare + 0.5) {
         break;
       }
 
@@ -322,7 +322,7 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel = "ahea
 #ifdef Gyro_curva
 
     while (true) {
-      if (posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5) {
+      if (posizione_angolare - 0.5 <= getGyroAngle() && getGyroAngle() <= posizione_angolare + 0.5) {
         break;
       }
 
@@ -375,7 +375,7 @@ void Command::turnBothWheels(int degree, int rpm, String wayTurn, String wayTrav
 #ifdef Gyro_curva
 
     while (true) {
-      if (posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5) {
+      if (posizione_angolare - 0.5 <= getGyroAngle() && getGyroAngle() <= posizione_angolare + 0.5) {
         break;
       }
 
@@ -401,7 +401,7 @@ void Command::turnBothWheels(int degree, int rpm, String wayTurn, String wayTrav
 #ifdef Gyro_curva
 
     while (true) {
-      if (posizione_angolare - 0.5 <= getGyroAngle() <= posizione_angolare + 0.5) {
+      if (posizione_angolare - 0.5 <= getGyroAngle() && getGyroAngle() <= posizione_angolare + 0.5) {
         break;
       }
 
