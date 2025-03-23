@@ -73,7 +73,7 @@ int velocita;
 int counter = 0;
 
 // Funzione calcolo angoli giroscopio
-int getGyroAngle();
+void getGyroAngle();
 // Funzione PID
 float PIDControl(float setpoint, float input);
 
@@ -100,15 +100,15 @@ public:
   void set();
   void go(int lenght, int rpm, String wayTravel, String accel);
   void turn(int degree, int rpm, String wayTurn, String wayTravel);
-  void turnBothWheels(int degree, int rpm);
+  void Command::turnBothWheels(int degree, int rpm, String wayTurn);
 };
 
 Command::Command() {}
 
 // angolo misurato dal giroscopio
-int angoloMisura = 0;
+float angoloMisura = 0;
 
-int getGyroAngle() {
+void getGyroAngle() {
   if (!dmpReady)
     return;
   // read a packet from FIFO
@@ -118,7 +118,7 @@ int getGyroAngle() {
     mpu.dmpGetEuler(euler, &q);
     // Serial.print("euler\t");
     // Serial.println(euler[0] * 180 / M_PI);
-    angoloMisura = (euler[0] * 180 / M_PI);
+    angoloMisura = float(euler[0] * 180 / M_PI) * 1;
   }
 }
 
@@ -206,7 +206,7 @@ int savePos;           // Variabile salvataggio posizione
 void Command::go(int lenght, int rpm, String wayTravel, String accel) {
   // Angolo da utilizzare come riferimento per andare dritti
   getGyroAngle();
-  int angoloSet = angoloMisura;
+  float angoloSet = angoloMisura;
   if (wayTravel == "ahead") {
     steps = 1;  // mantieni direzione invariata
   } else if (wayTravel == "back") {
@@ -243,7 +243,7 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     output = 0;
 
     // ---------- Movimento a velcoità costante ----------
-    while (abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition()) != (stride * MICROSTEPS * 2)) {
+    while ((abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition())) != (stride * MICROSTEPS * 2)) {
       // Calcola l'errore ogni 100 microsteps
       if (counter == 100) {
         getGyroAngle();
@@ -352,55 +352,43 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
 // ==================================================
 //                   TURN BOTH WHEELS
 // ==================================================
+int memoriaAngoli = 0;
+float valueAngolo = 0.0f;
 
-// funzione per sterzare con entrambe le ruote (il centro dell'asse posteriore resta fermo)
-void Command::turnBothWheels(int degree, int rpm) {
-  getGyroAngle();
-  int angoloSet = angoloMisura;
-  // Calcola angolo giroscopio
-  getGyroAngle();
-  int valueAngolo = degree + angoloSet;
-  
-  if (valueAngolo >= 180) {
-    valueAngolo = -180 + abs(valueAngolo % 180);
+void Command::turnBothWheels(int degree, int rpm, String wayTurn) {
+  memoriaAngoli += degree;
+
+  int n = abs(memoriaAngoli / 180) + 2;
+
+  // Normalizza l'angolo tra -180 e +180
+  if (n % 2 == 0) {
+    valueAngolo = float(abs(memoriaAngoli % 180)) + 0.2;
+  } else if (n % 2 == 1) {
+    valueAngolo = float(-180 + abs(memoriaAngoli % 180)) + 0.2;
+  }
+
+  if (wayTurn == "left") {
     rpm = -rpm;
   }
-  if (valueAngolo < -180) {
-    valueAngolo = 180 - abs(valueAngolo % 180);
-    rpm = -rpm;
-  }
+
   Serial.println(valueAngolo);
   // angoloMisura = angolo misurato dal giroscipio
-  while (angoloMisura > valueAngolo) {
+  while (angoloMisura < (valueAngolo - 0.3) || angoloMisura > (valueAngolo + 0.3)) {
     getGyroAngle();
+    Serial.print(valueAngolo);
+    Serial.print("\t");
     Serial.println(angoloMisura);
-    stepperDX.move(1);
-    stepperSX.move(1);
+    stepperDX.moveTo(1);
+    stepperSX.moveTo(1);
     // Senso orario
     stepperDX.setSpeed(rpm);
     stepperSX.setSpeed(rpm);
     stepperDX.runSpeed();
     stepperSX.runSpeed();
-    stepperDX.stop();
-    stepperSX.stop();
   }
-
-  while (angoloMisura < valueAngolo) {
-    getGyroAngle();
-    Serial.println(angoloMisura);
-    stepperDX.move(1);
-    stepperSX.move(1);
-    // Senso antiorario
-    stepperDX.setSpeed(-rpm);
-    stepperSX.setSpeed(-rpm);
-    stepperDX.runSpeed();
-    stepperSX.runSpeed();
-    stepperDX.stop();
-    stepperSX.stop();
-  }
-
   return;
 }
+
 
 #ifdef FUNZIONI_SENZA_GYRO
 void Command::turnBothWheels(int degree, int rpm) {
