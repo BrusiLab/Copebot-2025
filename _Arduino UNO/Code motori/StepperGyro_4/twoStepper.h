@@ -118,7 +118,7 @@ void getGyroAngle() {
     mpu.dmpGetEuler(euler, &q);
     // Serial.print("euler\t");
     // Serial.println(euler[0] * 180 / M_PI);
-    angoloMisura = float(euler[0] * 180 / M_PI) * 1;
+    angoloMisura = float(euler[0] * 180 / M_PI);
   }
 }
 
@@ -241,21 +241,21 @@ void Command::go(int lenght, int rpm, String wayTravel, String accel) {
     stepperSX.setCurrentPosition(0);
     // Imposta la correzione dell'errore a 0
     output = 0;
-
+    int passiValore = (stride * MICROSTEPS * 2);
     // ---------- Movimento a velcoità costante ----------
-    while ((abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition())) != (stride * MICROSTEPS * 2)) {
+    while ((abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition())) < passiValore) {
       // Calcola l'errore ogni 100 microsteps
-      if (counter == 100) {
+      if (counter > 100) {
         getGyroAngle();
         input = angoloMisura;
         output = 0;
         setpoint = angoloSet;
         output = PIDControl(setpoint, input);
         counter = 0;
-        Serial.println(input);
+        //Serial.println((abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition())));
       }
       stepperDX.setSpeed(velocita - output);
-      stepperSX.setSpeed(-velocita - output);
+      stepperSX.setSpeed(-1 * (velocita + output));
       stepperDX.runSpeed();
       stepperSX.runSpeed();
       // Incrementa il contatore
@@ -352,19 +352,20 @@ void Command::turn(int degree, int rpm, String wayTurn, String wayTravel) {
 // ==================================================
 //                   TURN BOTH WHEELS
 // ==================================================
-int memoriaAngoli = 0;
+float memoriaAngoli = 0.0f;
 float valueAngolo = 0.0f;
 
 void Command::turnBothWheels(int degree, int rpm, String wayTurn) {
-  memoriaAngoli += degree;
+  float floatDegree = float(degree) * 0.97f; //diminuendo il fattore moltiplicativo l'angolo diminuisce
+  memoriaAngoli += floatDegree;
 
   int n = abs(memoriaAngoli / 180) + 2;
 
   // Normalizza l'angolo tra -180 e +180
   if (n % 2 == 0) {
-    valueAngolo = float(abs(memoriaAngoli % 180)) + 0.2;
+    valueAngolo = float(abs(int(memoriaAngoli) % 180)) + 0.3f;
   } else if (n % 2 == 1) {
-    valueAngolo = float(-180 + abs(memoriaAngoli % 180)) + 0.2;
+    valueAngolo = float(-180 + abs(int(memoriaAngoli) % 180)) + 0.3f;
   }
 
   if (wayTurn == "left") {
@@ -373,16 +374,16 @@ void Command::turnBothWheels(int degree, int rpm, String wayTurn) {
 
   Serial.println(valueAngolo);
   // angoloMisura = angolo misurato dal giroscipio
-  while (angoloMisura < (valueAngolo - 0.3) || angoloMisura > (valueAngolo + 0.3)) {
+  while (angoloMisura < (valueAngolo - 0.4) || angoloMisura > (valueAngolo + 0.4)) {
     getGyroAngle();
-    Serial.print(valueAngolo);
-    Serial.print("\t");
-    Serial.println(angoloMisura);
+    //Serial.print(valueAngolo);
+    //Serial.print("\t");
+    //Serial.println(angoloMisura);
     stepperDX.moveTo(1);
     stepperSX.moveTo(1);
     // Senso orario
-    stepperDX.setSpeed(rpm);
-    stepperSX.setSpeed(rpm);
+    stepperDX.setSpeed(-rpm);
+    stepperSX.setSpeed(-rpm);
     stepperDX.runSpeed();
     stepperSX.runSpeed();
   }
