@@ -22,7 +22,7 @@
 #define diametroRuote 68   // Diametro ruote in mm
 #define distanzaRuote 172  // Distanza tra le ruote in mm
 #define durata 208000      // Durata gara in millis
-const int incrementoAccelerazione = 1;
+const int incrementoAccelerazione = 1;    // più aumenta il numero più l'accelerazione è maggiore
 
 // Pins motore destro
 #define STEPPERDX_DIR_PIN 6
