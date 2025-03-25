@@ -1,8 +1,8 @@
 //include librerie
 #include "twoSteppers.h"  //stepper ruote
-#include "Wire.h"        //comunicazione I2C per sensori
+#include "Wire.h"         //comunicazione I2C per sensori
 
-Robot robot = Robot();  //creazione oggetto robot
+Robot robot = Robot();    //creazione oggetto robot
 
 int rpm = 1000;
 
