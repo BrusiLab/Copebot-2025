@@ -356,7 +356,8 @@ float memoriaAngoli = 0.0f;
 float valueAngolo = 0.0f;
 
 void Command::turnBothWheels(int degree, int rpm, String wayTurn) {
-  float floatDegree = float(degree) * 0.97f; //diminuendo il fattore moltiplicativo l'angolo diminuisce
+  float floatDegree = float(degree) * 0.9865f; //diminuendo il fattore moltiplicativo l'angolo diminuisce
+                                             //il valore corretto sarebbe circa 0.986f
   memoriaAngoli += floatDegree;
 
   int n = abs(memoriaAngoli / 180) + 2;
