@@ -1,24 +1,53 @@
 String ricevi();
 void invia(String line);
-void blink(int pin);
 
-int dt1;
-long tp1;
+int dt1, tp1 = 0;
+
+#define t1 50
+
+#define giallo 4
+#define rosso 3
+#define verde 2
+
 long i = 0;
-
-#define t1 50  // Tempo di lampeggio
 
 void setup() {
   Serial.begin(9600);
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(giallo, OUTPUT);
+  pinMode(rosso, OUTPUT);
+  pinMode(verde, OUTPUT);
 }
 
+String ricevuto = "";
+
 void loop() {
+  
   invia("rileva");
-  if(ricevi() == "rosso"){
-    invia("top");
-  } else {
-    invia("sbagliato");
+
+  ricevuto = ricevi();
+  invia(ricevuto);
+
+  if(ricevuto == "rosso"){
+    digitalWrite(rosso, HIGH);
+    digitalWrite(giallo, LOW);
+    digitalWrite(verde, LOW);
+    invia("rosso");
+  } else if (ricevuto == "giallo") {
+    digitalWrite(rosso, LOW);
+    digitalWrite(giallo, HIGH);
+    digitalWrite(verde, LOW);
+    invia("giallo");
+  } else if (ricevuto == "verde") {
+    digitalWrite(rosso, LOW);
+    digitalWrite(giallo, LOW);
+    digitalWrite(verde, HIGH);
+    invia("verde");
+  } else if (ricevuto == "blu") {
+    digitalWrite(rosso, LOW);
+    digitalWrite(giallo, LOW);
+    digitalWrite(verde, LOW);
+    invia("blu");
   }
-  delay(7500);
+
+  delay(10000);
 }
