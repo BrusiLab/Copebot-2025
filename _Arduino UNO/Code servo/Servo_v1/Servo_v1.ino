@@ -92,7 +92,7 @@ void loop() {
 
   digitalWrite(ferma_servo, LOW);
 
-  servo.setPWM(servo_ruota, 0, angolo_max);
+  servo.setPWM(servo_ruota, 0, angolo_max); //posizione del servo sul driver, 0, angolo
   delay(1000);
   servo.setPWM(servo_ruota, 0, angolo_min);
   delay(1000);
@@ -101,7 +101,7 @@ void loop() {
 
   delay(1000);
 
-  servo_inclinatore.write(0);
+  servo_inclinatore.write(0); //inserire angolo di inclinazione (diverso perché non su driver)
   delay(500);
   servo_inclinatore.write(100);
 
