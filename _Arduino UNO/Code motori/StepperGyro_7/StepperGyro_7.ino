@@ -1,6 +1,7 @@
 //include librerie
 #include "twoSteppers.h"  // Stepper ruote
-#include "Wire.h"         // Comunicazione I2C per sensori
+//#include "comunicazione.h"
+#include "Wire.h"  // Comunicazione I2C per sensori
 
 Robot robot = Robot();  // Creazione oggetto master (gestione motori)
 
@@ -14,4 +15,8 @@ void setup() {
 }
 
 void loop() {
+  // true --> giroscopio attivo
+  // valse --> giroscopio disattivato
+  robot.test(true);
+  while (true) {}
 }
