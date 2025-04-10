@@ -1,21 +1,14 @@
-/*
-  COLLEGAMENTO DRIVER:
-  GND --> GND
-  OE  --> PIN DIGITALE  (interrupt)
-  SCL --> SCL
-  SDA --> SDA
-  VCC --> 5V
-
-  COLLEGAMENTO SERVO:
-  PWM --> PIN DIGITALE
-  VCC --> ALIMENTAZIONE
-  GND --> GND
-*/
+#include "lidar.h"
+#include "comunicazione.h"
+#include "twoSteppers.h"
 
 #include <Adafruit_PWMServoDriver.h>
 #include <Servo.h>
-#include <Wire.h>
+#include "Wire.h" 
 
+Lidar lidar = Lidar();
+Comunicazione arduino = Comunicazione();
+Robot robot = Robot(); 
 Adafruit_PWMServoDriver servo = Adafruit_PWMServoDriver();
 Servo servo_inclinatore; //servo piccolo diverso (non attaccato a driver perché usa meno corrente)
 
@@ -34,28 +27,27 @@ Servo servo_inclinatore; //servo piccolo diverso (non attaccato a driver perché
 #define kfcaperto 5
 #define kfcchiuso 6
 
+String ricevuto = "";
+int velocita_vai = 2000;
+int velocita_gira = 2000;
 int angolo_L = 0;
 int fine = 0;
-
-void interrompi() {
-  if (millis() > 208000) {
-    digitalWrite(ferma_servo, HIGH); //ferma tutti i servo
-  }
-}
 
 void setup() {
 
   Serial.begin(9600);
+  while (!Serial) {}
+
+  pinMode(LED_BUILTIN, OUTPUT); 
+  pinMode(kfcchiuso, INPUT);
+  pinMode(ferma_servo, OUTPUT);
+
+  robot.set();
 
   servo.begin();
   servo.setPWMFreq(60); //da 24 a 1600
 
   servo_inclinatore.attach(pin_inclinatore);
-
-  pinMode(kfcchiuso, INPUT);
-  pinMode(ferma_servo, OUTPUT);
-
-  delay(100);
 }
 
 void apri_L() {
@@ -89,22 +81,21 @@ void chiudi_L(int posizione) {
 }
 
 void loop() {
+  
+  if (lidar.misura() <= 5){
 
-  digitalWrite(ferma_servo, LOW);
+    arduino.invia("rileva");
+    ricevuto = arduino.ricevi();
 
-  servo.setPWM(servo_ruota, 0, angolo_max); //posizione del servo sul driver, 0, angolo
-  delay(1000);
-  servo.setPWM(servo_ruota, 0, angolo_min);
-  delay(1000);
+  }
 
-  digitalWrite(ferma_servo, HIGH);
-
-  delay(1000);
-
-  servo_inclinatore.write(0); //inserire angolo di inclinazione (diverso perché non su driver)
-  delay(500);
-  servo_inclinatore.write(100);
-
-  delay(1000);
+  if(ricevuto == "rosso"){
+    apri_L();
+    robot.vai(10, 1000, "avanti", "off");
+    //inclina
+    chiudi_L(0);
+  }
 
 }
+
+
