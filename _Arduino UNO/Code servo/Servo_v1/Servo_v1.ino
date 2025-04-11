@@ -16,30 +16,34 @@
 #include <Servo.h>
 #include <Wire.h>
 
-Adafruit_PWMServoDriver servo = Adafruit_PWMServoDriver();
-Servo servo_inclinatore; //servo piccolo diverso (non attaccato a driver perché usa meno corrente)
+Adafruit_PWMServoDriver servo = Adafruit_PWMServoDriver(); //dichiaro oggetto driver
+Servo servo_inclinatore;                                   //servo piccolo diverso (non attaccato a driver perché usa meno corrente)
 
-// posizione da 0 a 4095
-#define angolo_min 125
-#define angolo_mid 375 //90 gradi
-#define angolo_max 600
+//Direzione per servo sbloccato
+#define orario 150      
+#define fermo 385       
+#define antiorario 650 
 
-#define ferma_servo       2 //interrompi corrente
+//Angoli per servo normali
+#define chiuso 150  //0
+#define retto 385   //90 
+#define aperto 650  //180
 
-#define pin_inclinatore   4 //pin servo che inclina blocchi
-#define servo_L           0 //pos servo che raccoglie blocchi
-#define servo_ruota       1 //pos servo che sposta blocchi
-#define servo_bodyguard   2 //pos servo che contiene blocchi
+#define ferma_servo 2      //interrompi corrente
 
-#define kfcaperto 5
-#define kfcchiuso 6
+#define pin_inclinatore 4  //pin servo piccolo che inclina blocchi
+#define servo_L 0          //pos servo sbloccato che raccoglie blocchi
+#define servo_ruota 1      //pos servo che sposta blocchi
+#define servo_bodyguard 2  //pos servo che contiene blocchi
 
-int angolo_L = 0;
-int fine = 0;
+#define kfcaperto 5        //fine corsa per L aperta
+#define kfcchiuso 6        //fine corsa per L chiusa
 
-void interrompi() {
+long t0 = 0;
+
+void interrompi() {        //ferma tutti i servo se scaduto tempo
   if (millis() > 208000) {
-    digitalWrite(ferma_servo, HIGH); //ferma tutti i servo
+    digitalWrite(ferma_servo, HIGH);  
   }
 }
 
@@ -48,11 +52,12 @@ void setup() {
   Serial.begin(9600);
 
   servo.begin();
-  servo.setPWMFreq(60); //da 24 a 1600
+  servo.setPWMFreq(60);  //da 24 a 1600
 
   servo_inclinatore.attach(pin_inclinatore);
 
   pinMode(kfcchiuso, INPUT);
+  pinMode(kfcaperto, INPUT);
   pinMode(ferma_servo, OUTPUT);
 
   delay(100);
@@ -60,51 +65,56 @@ void setup() {
 
 void apri_L() {
 
-  digitalWrite(ferma_servo, LOW); //attiva corrente
+  digitalWrite(ferma_servo, LOW);           //attiva corrente
 
-  while (digitalRead(kfcaperto) == LOW && angolo_L < 4095) {  //finché non arrivi in fondo e non hai raggiunto max apertura
-    servo.setPWM(servo_L, 0, angolo_L);
-    angolo_L++;
+  while (digitalRead(kfcaperto) == LOW) {   //finché non arrivi in fondo apri L
+    servo.setPWM(servo_L, 0, antiorario);
   }
 
-  digitalWrite(ferma_servo, HIGH);  //blocca corrente
+  servo.setPWM(servo_L, 0, fermo);          //ferma il servo sbloccato
+
+  digitalWrite(ferma_servo, HIGH);          //blocca corrente
 }
 
-void chiudi_L(int posizione) {  
+void chiudi_L(int posizione = 1) {
 
-  digitalWrite(ferma_servo, LOW);
+  digitalWrite(ferma_servo, LOW);           //attiva corrente
 
-  if (posizione == 0) {   //posizione = 0 se fino in fondo
-    fine = 0;
-  } else {                //posizione = 1 se fino a metà cerchio
-    fine = 300;           //non si chiude tutta --> blocchi sul cerchio esterno
+  if (posizione == 0) {                     //posizione = 0 se fino in fondo
+    
+    while (digitalRead(kfcchiuso) == LOW) { //finché non arrivi in fondo chiudi L
+      servo.setPWM(servo_L, 0, orario);
+    }
+
+    servo.setPWM(servo_L, 0, fermo);        //ferma il servo sbloccato
+
+  } else {                                  //posizione = 1 se lasci blocco esternamente
+    
+    t0 = millis();
+    
+    while (millis()-t0 <= 2500) {           //tempo (stima) per raggiungere posizione
+      servo.setPWM(servo_L, 0, orario);
+    }
+
+    servo.setPWM(servo_L, 0, fermo);        //ferma il servo sbloccato
+
   }
 
-  while (digitalRead(kfcchiuso) == LOW && angolo_L > fine) {  //finché non arrivi a fine e non hai raggiunto min apertura
-    servo.setPWM(servo_L, 0, angolo_L);
-    angolo_L--;
-  }
-
-  digitalWrite(ferma_servo, HIGH);
+  digitalWrite(ferma_servo, HIGH);          //blocca corrente
 }
 
 void loop() {
 
   digitalWrite(ferma_servo, LOW);
 
-  servo.setPWM(servo_ruota, 0, angolo_max); //posizione del servo sul driver, 0, angolo
+  servo.setPWM(servo_ruota, 0, chiuso);
   delay(1000);
-  servo.setPWM(servo_ruota, 0, angolo_min);
+  servo.setPWM(servo_ruota, 0, retto);
   delay(1000);
+  servo.setPWM(servo_ruota, 0, aperto);
+  delay(1000);
+  servo.setPWM(servo_ruota, 0, retto);
+  delay(2500);
 
   digitalWrite(ferma_servo, HIGH);
-
-  delay(1000);
-
-  servo_inclinatore.write(0); //inserire angolo di inclinazione (diverso perché non su driver)
-  delay(500);
-  servo_inclinatore.write(100);
-
-  delay(1000);
-
 }
