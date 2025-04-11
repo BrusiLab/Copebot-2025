@@ -92,3 +92,12 @@ void raccogli_blocco(){
 
 }
 
+void scarica_blocchi(){
+  
+  servo.setPWM(servo_bodyguard, 0, angolo(100));  //apri paratia
+  servo.setPWM(servo_ruota, 0, angolo(100));      //spingi giù blocchi
+  servo.setPWM(servo_ruota, 0, angolo(0));        //chiudi leva
+  servo.setPWM(servo_bodyguard, 0, angolo(0));    //chiudi paratia
+  
+}
+

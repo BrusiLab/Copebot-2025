@@ -89,6 +89,7 @@ float previousError = 0, integral = 0;
 int velocita = 0;
 // Contatore misura angolo
 int contatore = 0;
+int contatore2 = 0;
 // angolo misurato dal giroscopio
 float angoloMisura = 0.0f;
 
@@ -139,6 +140,8 @@ void interrompi() {
   }
 }
 
+void raccogli_blocco();
+void blocco();
 
 // ===================================================================
 // =================          CLASSE ROBOT        ====================
@@ -150,6 +153,7 @@ public:
 
   void set();
   void vai(int length, int rpm, String verso, String accelerazione);
+  void vai_blocchi(int length, int rpm, String verso, String accelerazione);
   void gira(int angoloGradi, int rpm, String verso);
   void giraRuote(int angoloGradi, int rpm);
   void test(bool giroVal);
@@ -415,6 +419,201 @@ void Robot::vai(int length, int rpm, String verso, String accelerazione) {
   }
 }
 
+void Robot::vai_blocchi(int length, int rpm, String verso, String accelerazione) {
+
+  if (giroscopio_attivo == true) {
+    // Angolo da utilizzare come riferimento per andare dritti
+    rilevaAngolo();
+    float angoloSet = angoloMisura;
+
+    if (verso == "avanti") {
+      statoVerso = 1;  // mantieni direzione invariata
+    } else if (verso == "indietro") {
+      statoVerso = -1;  // inverti direzione
+    }
+
+    // ============== ACCELERAZIONE ==============
+    if (accelerazione == "on") {
+      // Imposta come 0 la posizione di partenza
+      stepperDX.setCurrentPosition(0);
+      stepperSX.setCurrentPosition(0);
+      // Velocità motori a regime
+      // Velocità negativa o positiva in base a statoVerso
+      velocita = rpm * statoVerso;
+
+      // ---------- Accelerazione ----------
+      // La variabile "i" gestisce incrementa la velocità ogni microstep
+      for (int i = 300; i < rpm; i += K_accelerazione) {
+        stepperDX.move(1);
+        stepperSX.move(1);
+        stepperDX.setSpeed(i * statoVerso);
+        stepperSX.setSpeed(-i * statoVerso);
+        stepperDX.runSpeed();
+        stepperSX.runSpeed();
+      }
+
+      // Salva la posizione attuale
+      savePos = abs(stepperDX.currentPosition());
+      // Calcola i passi che lo stepper deve compiere
+      passiDaCompiere = abs(length) / (PI * diametroRuote) * numeroPassi - savePos * 2 / micropassi;
+      // Imposta come 0 la posizione di partenza
+      stepperDX.setCurrentPosition(0);
+      stepperSX.setCurrentPosition(0);
+      // Imposta la correzione dell'errore a 0
+      output = 0;
+      int passiValore = (passiDaCompiere * micropassi * 2);
+      // ---------- Movimento a velcoità costante ----------
+      while ((abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition())) < passiValore) {
+        // Calcola l'errore ogni 100 micropassi
+        if (contatore > K_volte_misura_angolo) {
+          rilevaAngolo();
+          input = angoloMisura;
+          output = 0;
+          setpoint = angoloSet;
+          output = PIDControl(setpoint, input);
+          contatore = 0;
+          //Serial.println((abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition())));
+        }
+
+        if (contatore2 > 500) {
+          blocco();
+          contatore2 = 0;
+        }
+
+        stepperDX.setSpeed(velocita - output);
+        stepperSX.setSpeed(-1 * (velocita + output));
+        stepperDX.runSpeed();
+        stepperSX.runSpeed();
+        // Incrementa il contatore
+        contatore++;
+        contatore2++;
+      }
+
+      // ---------- Decelerazione ----------
+      stepperDX.setCurrentPosition(0);
+      for (int i = rpm; i > 300; i -= K_accelerazione) {
+        stepperDX.move(1);
+        stepperSX.move(1);
+        stepperDX.setSpeed(i * statoVerso);
+        stepperSX.setSpeed(-i * statoVerso);
+        stepperDX.runSpeed();
+        stepperSX.runSpeed();
+      }
+      // savePos += stepperDX.currentPosition();
+
+      // ============== NO ACCELERAZIONE ==============
+    } else if (accelerazione == "off") {
+      // velocità motori
+      velocita = rpm * statoVerso;
+      // numero passi
+      passiDaCompiere = abs(length) / (PI * diametroRuote) * numeroPassi;
+      // imposta come 0 la posizione di partenza
+      stepperDX.setCurrentPosition(0);
+      stepperSX.setCurrentPosition(0);
+      // Imposta output PID a 0
+      output = 0;
+      contatore = 0;
+
+      // raggiungi posizione da lunghezza calcolata
+      while ((abs(stepperDX.currentPosition()) + abs(stepperSX.currentPosition())) < (passiDaCompiere * micropassi * 2)) {
+        // Calcola errore ogni 100 micropassi
+        if (contatore > K_volte_misura_angolo) {
+          rilevaAngolo();
+          input = angoloMisura;
+          setpoint = angoloSet;
+          output = PIDControl(setpoint, input);
+          contatore = 0;
+        }
+
+        if (contatore2 > 500) {
+          blocco();
+          contatore2 = 0;
+        }
+
+        stepperDX.setSpeed(velocita - output);
+        stepperSX.setSpeed(-1 * (velocita + output));
+        stepperDX.runSpeed();
+        stepperSX.runSpeed();
+
+        contatore++;
+        contatore2++;
+      }
+    }
+    stepperDX.stop();
+    stepperSX.stop();
+
+  } else if (giroscopio_attivo == false) {
+    if (verso == "avanti") {
+      statoVerso = 1;  // mantieni direzione invariata
+    } else if (verso == "indietro") {
+      statoVerso = -1;  // inverti direzione
+    }
+
+    if (accelerazione == "on") {
+      stepperDX.setCurrentPosition(0);
+      for (int i = 300; i < rpm; i += K_accelerazione) {
+        stepperDX.move(1);
+        stepperSX.move(1);
+        stepperDX.setSpeed(i * statoVerso);  // la velocità è negativa o positiva in base alla direzione
+        stepperSX.setSpeed(-i * statoVerso);
+        stepperDX.runSpeed();
+        stepperSX.runSpeed();
+      }
+      savePos = stepperDX.currentPosition();
+
+      passiDaCompiere = abs(length) / (PI * diametroRuote) * numeroPassi - savePos * 2 / micropassi;
+      //Serial.println(passiDaCompiere);
+      stepperDX.setCurrentPosition(0);                                             // imposta come 0 la posizione di partenza
+      while (abs(stepperDX.currentPosition()) < (passiDaCompiere * micropassi)) {  //raggiungi posizione da lunghezza calcolata
+        stepperDX.setSpeed(rpm * statoVerso);                                      // la velocità è negativa o positiva in base alla direzione
+        stepperSX.setSpeed(-rpm * statoVerso);
+        stepperDX.runSpeed();
+        stepperSX.runSpeed();
+
+        if (contatore2 > 500) {
+          blocco();
+          contatore2 = 0;
+        }
+
+        contatore2++;
+      }
+
+      stepperDX.setCurrentPosition(0);
+      for (int i = rpm; i > 300; i -= K_accelerazione) {
+        stepperDX.move(1);
+        stepperSX.move(1);
+        stepperDX.setSpeed(i * statoVerso);  // la velocità è negativa o positiva in base alla direzione
+        stepperSX.setSpeed(-i * statoVerso);
+        stepperDX.runSpeed();
+        stepperSX.runSpeed();
+      }
+      savePos += stepperDX.currentPosition();
+
+    } else if (accelerazione == "off") {
+      // numero passi
+      passiDaCompiere = abs(length) / (PI * diametroRuote) * numeroPassi;
+      // imposta come 0 la posizione di partenza
+      stepperDX.setCurrentPosition(0);
+
+      //raggiungi posizione da lunghezza calcolata
+      while (abs(stepperDX.currentPosition()) < (passiDaCompiere * micropassi)) {
+        // velocità motori
+        stepperDX.setSpeed(rpm * statoVerso);
+        stepperSX.setSpeed(-rpm * statoVerso);
+        stepperDX.runSpeed();
+        stepperSX.runSpeed();
+
+        if (contatore2 > 500) {
+          blocco();
+          contatore2 = 0;
+        }
+
+        contatore2++;
+      }
+    }
+  }
+}
+
 #endif
 
 #ifdef NO_GIROSCOPIO
@@ -474,6 +673,81 @@ void Robot::vai(int length, int rpm, String verso, String accelerazione) {
       stepperSX.setSpeed(-rpm * statoVerso);
       stepperDX.runSpeed();
       stepperSX.runSpeed();
+    }
+  }
+}
+
+void Robot::vai_blocchi(int length, int rpm, String verso, String accelerazione) {
+
+  if (verso == "avanti") {
+    statoVerso = 1;  // mantieni direzione invariata
+  } else if (verso == "indietro") {
+    statoVerso = -1;  // inverti direzione
+  }
+
+  if (accelerazione == "on") {
+    //Serial.println("1");
+    //Serial.println(abs(length) / (PI * diametroRuote)* numeroPassi);
+    stepperDX.setCurrentPosition(0);
+    for (int i = 300; i < rpm; i += K_accelerazione) {
+      stepperDX.move(1);
+      stepperSX.move(1);
+      stepperDX.setSpeed(i * statoVerso);  // la velocità è negativa o positiva in base alla direzione
+      stepperSX.setSpeed(-i * statoVerso);
+      stepperDX.runSpeed();
+      stepperSX.runSpeed();
+    }
+    savePos = stepperDX.currentPosition();
+
+    passiDaCompiere = abs(length) / (PI * diametroRuote) * numeroPassi - abs(savePos) * 2 / micropassi;
+    //Serial.println(passiDaCompiere);
+    stepperDX.setCurrentPosition(0);                                             // imposta come 0 la posizione di partenza
+    while (abs(stepperDX.currentPosition()) < (passiDaCompiere * micropassi)) {  //raggiungi posizione da lunghezza calcolata
+      stepperDX.setSpeed(rpm * statoVerso);                                      // la velocità è negativa o positiva in base alla direzione
+      stepperSX.setSpeed(-rpm * statoVerso);
+      stepperDX.runSpeed();
+      stepperSX.runSpeed();
+
+      if (contatore2 > 500) {
+        blocco();
+        contatore2 = 0;
+      }
+
+      contatore2++;
+    }
+
+    stepperDX.setCurrentPosition(0);
+    for (int i = rpm; i > 300; i -= K_accelerazione) {
+      stepperDX.move(1);
+      stepperSX.move(1);
+      stepperDX.setSpeed(i * statoVerso);  // la velocità è negativa o positiva in base alla direzione
+      stepperSX.setSpeed(-i * statoVerso);
+      stepperDX.runSpeed();
+      stepperSX.runSpeed();
+    }
+    savePos += stepperDX.currentPosition();
+
+  } else if (accelerazione == "off") {
+
+    // numero passi
+    passiDaCompiere = abs(length) / (PI * diametroRuote) * numeroPassi;
+    // imposta come 0 la posizione di partenza
+    stepperDX.setCurrentPosition(0);
+
+    //raggiungi posizione da lunghezza calcolata
+    while (abs(stepperDX.currentPosition()) < abs(passiDaCompiere * micropassi)) {
+      // velocità motori
+      stepperDX.setSpeed(rpm * statoVerso);
+      stepperSX.setSpeed(-rpm * statoVerso);
+      stepperDX.runSpeed();
+      stepperSX.runSpeed();
+
+      if (contatore2 > 500) {
+        blocco();
+        contatore2 = 0;
+      }
+
+      contatore2++;
     }
   }
 }

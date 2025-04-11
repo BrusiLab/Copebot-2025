@@ -23,13 +23,13 @@ Servo servo_inclinatore; //servo piccolo diverso (non attaccato a driver perché
 
 #define ferma_servo 2      //interrompi corrente
 
-#define pin_inclinatore 4  //pin servo piccolo che inclina blocchi
+#define pin_inclinatore 3  //pin servo piccolo che inclina blocchi
 #define servo_L 0          //pos servo sbloccato che raccoglie blocchi
 #define servo_ruota 1      //pos servo che sposta blocchi
 #define servo_bodyguard 2  //pos servo che contiene blocchi
 
-#define kfcaperto 5        //fine corsa per L aperta
-#define kfcchiuso 6        //fine corsa per L chiusa
+#define kfcaperto 4        //fine corsa per L aperta
+#define kfcchiuso 5        //fine corsa per L chiusa
 
 String ricevuto = "";
 int velocita_vai = 2000;
@@ -58,38 +58,7 @@ void setup() {
 
 }
 
-void apri_L() {
-
-  digitalWrite(ferma_servo, LOW); //attiva corrente
-
-  while (digitalRead(kfcaperto) == LOW && angolo_L < 4095) {  //finché non arrivi in fondo e non hai raggiunto max apertura
-    servo.setPWM(servo_L, 0, angolo_L);
-    angolo_L++;
-  }
-
-  digitalWrite(ferma_servo, HIGH);  //blocca corrente
-}
-
-void chiudi_L(int posizione) {  
-
-  digitalWrite(ferma_servo, LOW);
-
-  if (posizione == 0) {   //posizione = 0 se fino in fondo
-    fine = 0;
-  } else {                //posizione = 1 se fino a metà cerchio
-    fine = 300;           //non si chiude tutta --> blocchi sul cerchio esterno
-  }
-
-  while (digitalRead(kfcchiuso) == LOW && angolo_L > fine) {  //finché non arrivi a fine e non hai raggiunto min apertura
-    servo.setPWM(servo_L, 0, angolo_L);
-    angolo_L--;
-  }
-
-  digitalWrite(ferma_servo, HIGH);
-
-}
-
-void loop() {
+void blocco(){
   
   if (lidar.misura() <= 5){
 
@@ -99,11 +68,23 @@ void loop() {
   }
 
   if(ricevuto == "rosso"){
-    apri_L();
-    robot.vai(10, 1000, "avanti", "off");
-    //inclina
-    chiudi_L(0);
+    raccogli_blocco();
   }
+}
+
+void loop() {
+  
+  robot.vai(400, velocita_vai, "avanti", "on");
+  robot.gira(90, velocita_gira, "destra");
+  robot.vai(900, velocita_vai, "avanti", "on");
+  robot.gira(90, velocita_gira, "sinistra");
+  robot.vai(400, velocita_vai, "avanti", "on");
+  robot.vai_blocchi(950, velocita_vai, "avanti", "on");
+  robot.gira(90, velocita_gira, "destra");
+  robot.vai(350, velocita_vai, "avanti", "on");
+  robot.gira(90, velocita_gira, "sinistra");
+
+  scarica_blocchi();
 
 }
 
