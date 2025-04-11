@@ -12,20 +12,24 @@ Robot robot = Robot();
 Adafruit_PWMServoDriver servo = Adafruit_PWMServoDriver();
 Servo servo_inclinatore; //servo piccolo diverso (non attaccato a driver perché usa meno corrente)
 
-// posizione da 0 a 4095
-#define angolo_min 125
-#define angolo_mid 375 //90 gradi
-#define angolo_max 600
+//----------------------------------------------------------------
+//                            SERVO
+//----------------------------------------------------------------
 
-#define ferma_servo       2 //interrompi corrente
+//Direzione per servo sbloccato
+#define orario 150      
+#define fermo 385       
+#define antiorario 650 
 
-#define pin_inclinatore   4 //pin servo che inclina blocchi
-#define servo_L           0 //pos servo che raccoglie blocchi
-#define servo_ruota       1 //pos servo che sposta blocchi
-#define servo_bodyguard   2 //pos servo che contiene blocchi
+#define ferma_servo 2      //interrompi corrente
 
-#define kfcaperto 5
-#define kfcchiuso 6
+#define pin_inclinatore 4  //pin servo piccolo che inclina blocchi
+#define servo_L 0          //pos servo sbloccato che raccoglie blocchi
+#define servo_ruota 1      //pos servo che sposta blocchi
+#define servo_bodyguard 2  //pos servo che contiene blocchi
+
+#define kfcaperto 5        //fine corsa per L aperta
+#define kfcchiuso 6        //fine corsa per L chiusa
 
 String ricevuto = "";
 int velocita_vai = 2000;
@@ -35,19 +39,23 @@ int fine = 0;
 
 void setup() {
 
+  //Seriale
   Serial.begin(9600);
   while (!Serial) {}
 
   pinMode(LED_BUILTIN, OUTPUT); 
-  pinMode(kfcchiuso, INPUT);
-  pinMode(ferma_servo, OUTPUT);
 
   robot.set();
 
+  //servo
   servo.begin();
-  servo.setPWMFreq(60); //da 24 a 1600
-
+  servo.setPWMFreq(60);  //da 24 a 1600
   servo_inclinatore.attach(pin_inclinatore);
+
+  pinMode(kfcchiuso, INPUT);
+  pinMode(kfcaperto, INPUT);
+  pinMode(ferma_servo, OUTPUT);
+
 }
 
 void apri_L() {
@@ -78,6 +86,7 @@ void chiudi_L(int posizione) {
   }
 
   digitalWrite(ferma_servo, HIGH);
+
 }
 
 void loop() {
