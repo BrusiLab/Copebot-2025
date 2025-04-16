@@ -105,7 +105,6 @@ void dmpDataReady() {
 
 void rilevaAngolo() {
   if (!dmpReady) {
-    Serial.println("impallato");
     return;
   }
   // read a packet from FIFO
@@ -113,8 +112,6 @@ void rilevaAngolo() {
     // display Euler angles in degrees
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetEuler(euler, &q);
-    // Serial.print("euler\t");
-    // Serial.println(euler[0] * 180 / M_PI);
     angoloMisura = float(euler[0] * 180 / M_PI);
   }
 }
@@ -132,7 +129,6 @@ float PIDControl(float setpoint, float input) {
 // Funzione di interruzione
 void interrompi() {
   if (millis() >= durata) {
-    Serial.println("finito");
     while (true) {
     }
   }
@@ -169,21 +165,21 @@ void Robot::set() {
   stepperSX.setMaxSpeed(2000.0);
 
   // initialize device
-  Serial.println(F("Initializing I2C devices..."));
+  //Serial.println(F("Initializing I2C devices..."));
   mpu.initialize();
 
   pinMode(INTERRUPT_PIN, INPUT);
 
   // verify connection
-  Serial.println(F("Testing device connections..."));
-  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+  //Serial.println(F("Testing device connections..."));
+  //Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
-  Serial.println(F("\nSend any character to begin DMP programming and demo: "));
+  //Serial.println(F("\nSend any character to begin DMP programming and demo: "));
 
   delay(100);  // delay di attesa per inizializzare la comunicazione con in gyro
 
   // load and configure the DMP
-  Serial.println(F("Initializing DMP..."));
+  //Serial.println(F("Initializing DMP..."));
   devStatus = mpu.dmpInitialize();
 
   // supply your own gyro offsets here, scaled for min sensitivity
@@ -199,18 +195,18 @@ void Robot::set() {
     mpu.CalibrateGyro(6);
     mpu.PrintActiveOffsets();
     // turn on the DMP, now that it's ready
-    Serial.println(F("Enabling DMP..."));
+    //Serial.println(F("Enabling DMP..."));
     mpu.setDMPEnabled(true);
 
     // enable Arduino interrupt detection
-    Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
-    Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
-    Serial.println(F(")..."));
+    //Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
+    //Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
+    //Serial.println(F(")..."));
     attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
     mpuIntStatus = mpu.getIntStatus();
 
     // set our DMP Ready flag so the main loop() function knows it's okay to use it
-    Serial.println(F("DMP ready! Waiting for first interrupt..."));
+    //Serial.println(F("DMP ready! Waiting for first interrupt..."));
     dmpReady = true;
 
     // get expected DMP packet size for later comparison
@@ -222,9 +218,9 @@ void Robot::set() {
     // 1 = initial memory load failed
     // 2 = DMP configuration updates failed
     // (if it's going to break, usually the code will be 1)
-    Serial.print(F("------ ERRORE -------  DMP Initialization failed (code "));
-    Serial.print(devStatus);
-    Serial.println(F(")"));
+    //Serial.print(F("------ ERRORE -------  DMP Initialization failed (code "));
+    //Serial.print(devStatus);
+    //Serial.println(F(")"));
     giroscopio_attivo = false;
     return;
   }
@@ -642,7 +638,6 @@ void Robot::giraRuote(int angoloGradi, int rpm) {
       rpm = -rpm;
     }
 
-    Serial.println(ampiezzaAngolo);
     // angoloMisura = angolo misurato dal giroscipio
     while (angoloMisura < (ampiezzaAngolo - 0.4) || angoloMisura > (ampiezzaAngolo + 0.4)) {
       rilevaAngolo();

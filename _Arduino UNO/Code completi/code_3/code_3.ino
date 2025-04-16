@@ -53,10 +53,9 @@ void setup() {
 
 
 void loop() {
-  delay(1000);
-  raccogli();
-  /*while (true) {
+  delay(35000);
+  while (true) {
     avanza();
-  }*/
+  }
   //digitalWrite(LED, HIGH);
 }
