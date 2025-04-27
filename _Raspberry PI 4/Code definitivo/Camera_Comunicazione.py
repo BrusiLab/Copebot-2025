@@ -90,7 +90,7 @@ if __name__ == '__main__':
       msg = receive()
       
       print(msg)
-              
+      
       if msg == "rileva":
          
          camera.start()              # Avvia la fotocamera
