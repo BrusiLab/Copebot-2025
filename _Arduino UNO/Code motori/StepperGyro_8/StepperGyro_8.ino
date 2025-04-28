@@ -19,16 +19,16 @@ void loop() {
   // valse --> giroscopio disattivato
   //robot.test(true);
 
+  delay(5000);
+
+  robot.vai(500, 1500, "avanti", "on");
+  delay(1000);
+  robot.vai(500, 1500, "indietro", "on");
   delay(500);
 
-  robot.vai(500, 2000, "avanti", "on");
-  delay(5000);
-  robot.vai(500, 2000, "indietro", "on");
-  delay(500);
-
-  robot.vai(200, 2000, "avanti", "off");
-  delay(5000);
-  robot.vai(200, 2000, "indietro", "off");
+  robot.vai(200, 750, "avanti", "off");
+  delay(1000);
+  robot.vai(200, 750, "indietro", "off");
   delay(500);
   
   robot.giraRuote(90, 500);

@@ -2,7 +2,7 @@
 #define TWO_STEPPER_H
 
 //#define NO_GIROSCOPIO
-#define NO_GIROSCOPIO
+#define GIROSCOPIO
 bool giroscopio_attivo = true;  // Variabile di stato che abilita le funzioni con il giroscopio
                                 // Se il giroscopio fallisce il codice procede lo stesso senza il giroscopio
 
