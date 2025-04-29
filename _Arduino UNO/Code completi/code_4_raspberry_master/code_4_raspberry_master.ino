@@ -27,7 +27,7 @@ void blink(int pin);
 // Prototipi funzioni servo
 void servo_set();
 void apri_L();
-void chiudi_L(int posizione = 1);
+void chiudi_L();
 void apri_leva();
 void chiudi_leva();
 
@@ -36,7 +36,8 @@ void inizio();
 void avanza();
 void raccogli();
 void scarica();
-void ritorna();
+void posiziona(int numero_blocchi);
+float converti(int angolo);
 
 // PINS
 #define ferma_servo 7  // Interrompi corrente
@@ -44,6 +45,7 @@ void ritorna();
 #define kfcchiuso 10   // Fine corsa per L chiusa
 #define LED 8          // LED pin
 
+int blocchi_raccolti = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -63,15 +65,30 @@ void setup() {
 
 
 void loop() {
+
   digitalWrite(LED, LOW);
-  String comando = ricevi();
+  //String comando = ricevi();
+  String comando = "j";
   if (comando == "j") {
     digitalWrite(LED, HIGH);
-    
+
     // Nuovo loop
     while (true) {
-      
-    }
 
+      //apri_leva();
+      apri_L();
+      //chiudi_leva();
+      chiudi_L();
+      //apri_leva();
+      blocchi_raccolti++;
+      delay(100);
+      posiziona(blocchi_raccolti);
+
+      if (blocchi_raccolti == 5) {
+        scarica();
+      }
+
+      delay(2000);
+    }
   }
 }

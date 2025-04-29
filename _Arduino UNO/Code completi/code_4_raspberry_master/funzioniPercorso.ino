@@ -2,6 +2,7 @@
 #define distanzaAvanza 500  //mm
 unsigned int avanzaCM = 0;
 
+
 void inizio() {
 }
 
@@ -44,12 +45,10 @@ void raccogli() {
   delay(500);
   chiudi_leva();
   delay(500);
-  chiudi_L(0);
+  chiudi_L();
   delay(500);
+  apri_leva();
+  blocchi_raccolti ++;
+  posiziona(blocchi_raccolti);
 }
 
-void scarica() {
-}
-
-void ritorna() {
-}
