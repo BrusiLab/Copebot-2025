@@ -13,19 +13,17 @@ void interrompiTutto() {
   }
 }
 
-
 void raccogli() {
-  robot.vai(100, velocitaMedia, "avanti", "off");
+  delay(100);
   apri_leva();
   apri_L();
+  robot.vai(100, velocitaAvanza, "avanti", "off");
   chiudi_leva();
-  chiudi_L(0);
+  chiudi_L();
+  apri_leva();
+  blocchi_raccolti ++;
+  posiziona(blocchi_raccolti);
 }
-
-
-void scarica() {
-}
-
 
 void inizio() {
   robot.vai(50, velocitaBassa, "avanti", "off");

@@ -38,10 +38,10 @@ void avanza() {
 
 void raccogli() {
   delay(100);
-  robot.vai(100, velocitaAvanza, "avanti", "off");
   apri_leva();
   delay(500);
   apri_L();
+  robot.vai(100, velocitaAvanza, "avanti", "off");
   delay(500);
   chiudi_leva();
   delay(500);

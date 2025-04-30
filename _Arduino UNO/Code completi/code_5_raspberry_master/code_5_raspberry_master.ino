@@ -36,7 +36,8 @@ void inizio();
 void avanza();
 void raccogli();
 void scarica();
-void ritorna();
+void posiziona(int numero_blocchi);
+float converti(int angolo);
 void interrompiTutto();
 void killer();
 
@@ -46,6 +47,7 @@ void killer();
 #define kfcaperto 10   // Fine corsa per L aperta
 #define LED 8          // LED pin
 
+int blocchi_raccolti = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -76,11 +78,7 @@ void loop() {
         // inizializzazione giroscopio e motori
         robot.set();
 
-        inizio();
         avanza(1000);
-        gira1();
-        avanza(1000);
-        gira2();
 
         while (true) {}
       }
