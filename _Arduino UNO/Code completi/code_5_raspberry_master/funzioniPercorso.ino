@@ -6,18 +6,18 @@ unsigned int avanzaCM = 0;
 
 void raccogli() {
   delay(100);
-  robot.vai(100, velocitaMedia, "avanti", "off");
+  robot.vai(100, velocitaAvanza, "avanti", "off");
   apri_leva();
   delay(500);
   apri_L();
   delay(500);
   chiudi_leva();
   delay(500);
-  chiudi_L(0);
+  chiudi_L();
   delay(500);
-}
-
-void scarica() {
+  apri_leva();
+  blocchi_raccolti ++;
+  posiziona(blocchi_raccolti);
 }
 
 void inizio() {
