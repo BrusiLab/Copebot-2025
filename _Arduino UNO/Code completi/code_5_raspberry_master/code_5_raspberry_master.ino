@@ -36,13 +36,16 @@ void inizio();
 void avanza();
 void raccogli();
 void scarica();
-void ritorna();
+void posiziona(int numero_blocchi);
+float converti(int angolo);
 
 // PINS
 #define ferma_servo 7  // Interrompi corrente
 #define kfcaperto 9    // Fine corsa per L aperta
 #define kfcchiuso 10   // Fine corsa per L chiusa
 #define LED 8          // LED pin
+
+int blocchi_raccolti = 0;
 
 
 void setup() {
