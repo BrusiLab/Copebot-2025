@@ -36,54 +36,54 @@ void inizio();
 void avanza();
 void raccogli();
 void scarica();
-void posiziona(int numero_blocchi);
-float converti(int angolo);
+void ritorna();
+void interrompiTutto();
+void killer();
 
 // PINS
 #define ferma_servo 7  // Interrompi corrente
-#define kfcaperto 9    // Fine corsa per L aperta
-#define kfcchiuso 10   // Fine corsa per L chiusa
+#define kfcchiuso 9    // Fine corsa per L chiusa
+#define kfcaperto 10   // Fine corsa per L aperta
 #define LED 8          // LED pin
-
-int blocchi_raccolti = 0;
 
 
 void setup() {
   Serial.begin(9600);
-  // Inizializzazione comunicazione I2C gyro e servo
-  robot.set();
+
+  // Inizializzazione comunicazione servo
   servo_set();
 
   // Dichiarazione pins
-  pinMode(kfcchiuso, INPUT);
   pinMode(kfcaperto, INPUT);
+  pinMode(kfcchiuso, INPUT);
   pinMode(ferma_servo, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED, OUTPUT);
 
+  digitalWrite(LED, LOW);
   delay(1000);
 }
 
 
 void loop() {
-  digitalWrite(LED, LOW);
-  //String comando = ricevi();
-  String comando = "j";
+  String comando = ricevi();
+  // String comando = "j";
+
   if (comando == "j") {
     digitalWrite(LED, HIGH);
-    delay(500);
-    digitalWrite(LED, LOW);
-    // Nuovo loop
     while (true) {
-      /*
-      inizio();
-      avanza(1000);
-      gira1();
-      avanza(1000);
-      gira2();
-      while(true){}
-      */
-      robot.esibizione();
+      if (digitalRead(kfcaperta) == HIGH) {
+        // inizializzazione giroscopio e motori
+        robot.set();
+
+        inizio();
+        avanza(1000);
+        gira1();
+        avanza(1000);
+        gira2();
+
+        while (true) {}
+      }
     }
   }
 }
