@@ -23,7 +23,7 @@ float gradi = 0;
 // ========================================================
 
 // Inzializzazione comunicazione
-void servo_set(){
+void servo_set() {
   servo.begin();
   servo.setPWMFreq(60);  //da 24 a 1600
   delay(100);
@@ -34,11 +34,17 @@ float converti(int angolo) {
   return gradi;
 }
 
+unsigned long tempoServo = 0;
+
 void apri_L() {
-  digitalWrite(ferma_servo, LOW);          //attiva corrente
-  while (digitalRead(kfcaperto) == LOW) {  //finché non arrivi in fondo apri L
+  digitalWrite(ferma_servo, LOW);  //attiva corrente
+
+  tempoServo = millis();
+
+  while (digitalRead(kfcaperto) == LOW || millis() - tempoServo < 3500) {  //finché non arrivi in fondo apri L
     servo.setPWM(servo_L, 0, orario);
   }
+
   servo.setPWM(servo_L, 0, fermo);  //ferma il servo sbloccato
   delay(100);
   digitalWrite(ferma_servo, HIGH);  //blocca corrente
@@ -46,7 +52,10 @@ void apri_L() {
 
 void chiudi_L() {
   digitalWrite(ferma_servo, LOW);          //attiva corrente
-  while (digitalRead(kfcchiuso) == LOW) {  //finché non arrivi in fondo chiudi L
+
+  tempoServo = millis();
+
+  while (digitalRead(kfcchiuso) == LOW || millis() - tempoServo < 3500) {  //finché non arrivi in fondo chiudi L
     servo.setPWM(servo_L, 0, antiorario);
   }
   servo.setPWM(servo_L, 0, fermo);  //ferma il servo sbloccato

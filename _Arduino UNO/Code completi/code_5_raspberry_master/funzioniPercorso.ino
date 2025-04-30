@@ -1,4 +1,4 @@
-#define velocitaBassa 500   //non meno di 300
+#define velocitaBassa 300   //non meno di 300
 #define velocitaAlta 2000   //usata dovunque si può usare (e non solo), MASSIMA 2500
 #define velocitaMedia 1200
 #define velocitaGiro 900    //meno di 1000
@@ -16,11 +16,17 @@ void interrompiTutto() {
 void raccogli() {
   delay(100);
   apri_leva();
+  delay(100);
   apri_L();
-  robot.vai(100, velocitaAvanza, "avanti", "off");
+  delay(100);
+  robot.vai(100, velocitaBassa, "avanti", "off");
+  delay(100);
   chiudi_leva();
+  delay(100);
   chiudi_L();
+  delay(100);
   apri_leva();
+  delay(100);
   blocchi_raccolti ++;
   posiziona(blocchi_raccolti);
 }
@@ -45,7 +51,7 @@ void avanza(int distanzaAvanza) {
 
     int misuraCM = lidar.misura();
 
-    if (misuraCM < 4) {
+    if (misuraCM < 7) {
       robot.vai(10, velocitaBassa, "avanti", "off");  // distanza per portare la fotocamera in posizione
       invia("rileva");
       String colore = ricevi();

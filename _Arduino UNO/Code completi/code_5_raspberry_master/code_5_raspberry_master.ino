@@ -27,7 +27,7 @@ void blink(int pin);
 // Prototipi funzioni servo
 void servo_set();
 void apri_L();
-void chiudi_L(int posizione = 1);
+void chiudi_L();
 void apri_leva();
 void chiudi_leva();
 
@@ -43,8 +43,8 @@ void killer();
 
 // PINS
 #define ferma_servo 7  // Interrompi corrente
-#define kfcchiuso 9    // Fine corsa per L chiusa
-#define kfcaperto 10   // Fine corsa per L aperta
+#define kfcchiuso 10   // Fine corsa per L chiusa
+#define kfcaperto 9    // Fine corsa per L aperta
 #define LED 8          // LED pin
 
 int blocchi_raccolti = 0;
@@ -69,19 +69,20 @@ void setup() {
 
 void loop() {
   String comando = ricevi();
-  // String comando = "j";
+  //String comando = "j";
 
   if (comando == "j") {
     digitalWrite(LED, HIGH);
     while (true) {
-      if (digitalRead(kfcaperta) == HIGH) {
+      //if (digitalRead(kfcaperto) == HIGH) {
         // inizializzazione giroscopio e motori
         robot.set();
 
         avanza(1000);
+        //raccogli();
 
         while (true) {}
-      }
+      //}
     }
   }
 }
