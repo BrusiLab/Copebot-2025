@@ -86,7 +86,7 @@ void scarica() {
   blocchi_raccolti = 0;
   delay(500);
 
-  //digitalWrite(ferma_servo, HIGH);  //blocca corrente
+  digitalWrite(ferma_servo, HIGH);  //blocca corrente
 }
 
 void posiziona(int numero_blocchi) {
@@ -101,5 +101,5 @@ void posiziona(int numero_blocchi) {
     delay(500);
   }
 
-  //digitalWrite(ferma_servo, HIGH);
+  digitalWrite(ferma_servo, HIGH);
 }
