@@ -30,6 +30,7 @@ void apri_L();
 void chiudi_L();
 void apri_leva();
 void chiudi_leva();
+void chiudi_ruota();
 
 // Prototipi funzioni percorso
 void inizio();
@@ -68,21 +69,28 @@ void setup() {
 
 
 void loop() {
+  /*
   String comando = ricevi();
   //String comando = "j";
 
   if (comando == "j") {
-    digitalWrite(LED, HIGH);
     while (true) {
-      //if (digitalRead(kfcaperto) == HIGH) {
+      blink(LED);
+      if (digitalRead(kfcaperto) == HIGH) {
         // inizializzazione giroscopio e motori
         robot.set();
 
-        avanza(1000);
-        //raccogli();
+        //avanza(1000);
+        raccogli();
 
         while (true) {}
-      //}
+      }
     }
   }
+  */
+  apri_leva();
+  //chiudi_leva();
+  //robot.set();
+  //raccogli();
+  delay(1000);
 }

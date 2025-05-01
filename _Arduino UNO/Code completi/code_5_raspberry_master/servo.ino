@@ -41,7 +41,7 @@ void apri_L() {
 
   tempoServo = millis();
 
-  while (digitalRead(kfcaperto) == LOW || millis() - tempoServo < 3500) {  //finché non arrivi in fondo apri L
+  while (digitalRead(kfcaperto) == LOW || millis() - tempoServo < 3000) {  //finché non arrivi in fondo apri L
     servo.setPWM(servo_L, 0, orario);
   }
 
@@ -51,11 +51,11 @@ void apri_L() {
 }
 
 void chiudi_L() {
-  digitalWrite(ferma_servo, LOW);          //attiva corrente
+  digitalWrite(ferma_servo, LOW);  //attiva corrente
 
   tempoServo = millis();
 
-  while (digitalRead(kfcchiuso) == LOW || millis() - tempoServo < 3500) {  //finché non arrivi in fondo chiudi L
+  while (digitalRead(kfcchiuso) == LOW || millis() - tempoServo < 3000) {  //finché non arrivi in fondo chiudi L
     servo.setPWM(servo_L, 0, antiorario);
   }
   servo.setPWM(servo_L, 0, fermo);  //ferma il servo sbloccato
@@ -65,14 +65,20 @@ void chiudi_L() {
 
 void chiudi_leva() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
-  servo.setPWM(servo_inclinatore, 0, chiuso);
+  for (int i = aperto_inclinatore; i > chiuso; i--) {
+    servo.setPWM(servo_inclinatore, 0, i);
+    delay(2);
+  }
   delay(100);
   digitalWrite(ferma_servo, HIGH);  //blocca corrente
 }
 
 void apri_leva() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
-  servo.setPWM(servo_inclinatore, 0, aperto_inclinatore);
+  for (int i = chiuso; i < aperto_inclinatore; i++) {
+    servo.setPWM(servo_inclinatore, 0, i);
+    delay(2);
+  }
   delay(100);
   digitalWrite(ferma_servo, HIGH);  //blocca corrente
 }
@@ -108,5 +114,11 @@ void posiziona(int numero_blocchi) {
     delay(500);
   }
 
+  digitalWrite(ferma_servo, HIGH);
+}
+
+void chiudi_ruota() {
+  digitalWrite(ferma_servo, LOW);
+  servo.setPWM(servo_ruota, 0, 650);  //chiudi la ruota
   digitalWrite(ferma_servo, HIGH);
 }

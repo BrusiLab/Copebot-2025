@@ -1,4 +1,4 @@
-#define t1 50
+#define t1 200
 int dt1, tp1 = 0;
 unsigned long i = 0;
 
