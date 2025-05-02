@@ -29,6 +29,7 @@ void servo_set() {
   delay(100);
 }
 
+
 float converti(int angolo) {
   gradi = map(angolo, 125, 650, 0, 180);
   return gradi;
@@ -65,8 +66,8 @@ void chiudi_L() {
 
 void chiudi_leva() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
-  for (int i = aperto_inclinatore; i > chiuso; i--) {
-    servo.setPWM(servo_inclinatore, 0, i);
+  for (int h = aperto_inclinatore; h > chiuso; h--) {
+    servo.setPWM(servo_inclinatore, 0, h);
     delay(2);
   }
   delay(100);
@@ -75,8 +76,8 @@ void chiudi_leva() {
 
 void apri_leva() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
-  for (int i = chiuso; i < aperto_inclinatore; i++) {
-    servo.setPWM(servo_inclinatore, 0, i);
+  for (int k = chiuso; k < aperto_inclinatore; k++) {
+    servo.setPWM(servo_inclinatore, 0, k);
     delay(2);
   }
   delay(100);
@@ -119,6 +120,9 @@ void posiziona(int numero_blocchi) {
 
 void chiudi_ruota() {
   digitalWrite(ferma_servo, LOW);
-  servo.setPWM(servo_ruota, 0, 650);  //chiudi la ruota
+  for(int j = 550; j <= 650; j++) {
+    servo.setPWM(servo_ruota, 0, j);  //chiudi ruota
+    delay(5);
+  }
   digitalWrite(ferma_servo, HIGH);
 }

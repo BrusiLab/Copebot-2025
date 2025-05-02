@@ -63,34 +63,30 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED, OUTPUT);
 
+  digitalWrite(ferma_servo, HIGH);  // Servo spento
   digitalWrite(LED, LOW);
   delay(1000);
 }
 
 
 void loop() {
-  /*
   String comando = ricevi();
   //String comando = "j";
 
   if (comando == "j") {
+    robot.set(); // inizializza stepper e giroscopio
+
     while (true) {
       blink(LED);
       if (digitalRead(kfcaperto) == HIGH) {
-        // inizializzazione giroscopio e motori
-        robot.set();
+        
+        inizio();
+        avanza();
+        gira1();
+        gira2();
 
-        //avanza(1000);
-        raccogli();
-
-        while (true) {}
+        while (true) {} // interrompi programma
       }
     }
   }
-  */
-  apri_leva();
-  //chiudi_leva();
-  //robot.set();
-  //raccogli();
-  delay(1000);
 }

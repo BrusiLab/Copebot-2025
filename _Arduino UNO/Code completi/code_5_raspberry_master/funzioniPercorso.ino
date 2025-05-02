@@ -4,6 +4,8 @@
 #define velocitaGiro 900    //meno di 1000
 unsigned int avanzaCM = 0;
 
+
+
 // Funzione di interruzione
 void interrompiTutto() {
   if (millis() >= durata) {
