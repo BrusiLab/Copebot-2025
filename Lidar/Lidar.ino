@@ -11,7 +11,5 @@ void setup() {
 void loop() {
   
   Serial.println(lidar.misura());
-
-  delay(500);
-
+  
 }

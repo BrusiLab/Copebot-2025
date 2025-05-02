@@ -66,7 +66,7 @@ void chiudi_L() {
 
 void chiudi_leva() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
-  for (int h = aperto_inclinatore; h > chiuso; h--) {
+  for (int h = aperto_inclinatore; h >= chiuso; h--) {
     servo.setPWM(servo_inclinatore, 0, h);
     delay(2);
   }
@@ -76,7 +76,7 @@ void chiudi_leva() {
 
 void apri_leva() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
-  for (int k = chiuso; k < aperto_inclinatore; k++) {
+  for (int k = chiuso; k <= aperto_inclinatore; k++) {
     servo.setPWM(servo_inclinatore, 0, k);
     delay(2);
   }
@@ -87,20 +87,30 @@ void apri_leva() {
 void scarica() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
 
-  servo.setPWM(servo_bodyguard, 0, retto);  //apri paratia
+  for (i = chiuso; i <= retto; i++) {
+    servo.setPWM(servo_bodyguard, 0, i);  //apri paratia
+    delay(2);
+  }
 
   for (i = 650; i >= 300; i--) {
     servo.setPWM(servo_ruota, 0, i);  //scarica
     delay(8);
   }
 
-  servo.setPWM(servo_ruota, 0, 650);  //chiudi ruota
-  delay(500);
-  servo.setPWM(servo_bodyguard, 0, chiuso);  //chiudi paratia
+  for (i = 300; i <= 650; i++) {
+    servo.setPWM(servo_ruota, 0, i);  //chiudi ruota
+    delay(2);
+  }
+
+  for (i = retto; i >= chiuso; i--) {
+    servo.setPWM(servo_bodyguard, 0, i);  //chiudi paratia
+    delay(2);
+  }
+
   blocchi_raccolti = 0;
   delay(500);
 
-  digitalWrite(ferma_servo, HIGH);  //blocca corrente
+  //digitalWrite(ferma_servo, HIGH);  //blocca corrente
 }
 
 void posiziona(int numero_blocchi) {
@@ -111,18 +121,22 @@ void posiziona(int numero_blocchi) {
       servo.setPWM(servo_ruota, 0, i);  //scarica
       delay(5);
     }
-    servo.setPWM(servo_ruota, 0, 650);  //chiudi la ruota
-    delay(500);
+    for (i = 550; i <= 650; i++) {
+      servo.setPWM(servo_ruota, 0, i);  //chiudi ruota
+      delay(5);
+    };
   }
 
-  digitalWrite(ferma_servo, HIGH);
+  //digitalWrite(ferma_servo, HIGH);
 }
 
+/*
 void chiudi_ruota() {
   digitalWrite(ferma_servo, LOW);
-  for(int j = 550; j <= 650; j++) {
+  for (int j = 550; j <= 650; j++) {
     servo.setPWM(servo_ruota, 0, j);  //chiudi ruota
     delay(5);
   }
   digitalWrite(ferma_servo, HIGH);
 }
+*/

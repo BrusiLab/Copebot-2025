@@ -34,7 +34,7 @@ void chiudi_ruota();
 
 // Prototipi funzioni percorso
 void inizio();
-void avanza();
+void avanza(int distanzaAvanza);
 void raccogli();
 void scarica();
 void posiziona(int numero_blocchi);
@@ -81,8 +81,10 @@ void loop() {
       if (digitalRead(kfcaperto) == HIGH) {
         
         inizio();
-        avanza();
+        robot.vai(1000, 2000, "avanti", "on");
+        //avanza(1000);
         gira1();
+        robot.vai(900, 2000, "avanti", "on");
         gira2();
 
         while (true) {} // interrompi programma

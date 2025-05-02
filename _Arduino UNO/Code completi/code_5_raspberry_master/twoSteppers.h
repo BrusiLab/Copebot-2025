@@ -17,7 +17,7 @@ bool giroscopio_attivo = true;  // Variabile di stato che abilita le funzioni co
 #define micropassi 4       // micropassi per ogni passo
 #define numeroPassi 200    // Passi interi per giro
 #define diametroRuote 63   // Diametro ruote in mm
-#define distanzaRuote 178  // Distanza tra le ruote in mm
+#define distanzaRuote 173  // Distanza tra le ruote in mm
 #define durata 208000      // Durata gara in millis
 // Fattore contatore numero passi tra due rilevazioni dell'angolo
 const int K_volte_misura_angolo = 50;  // Più è grande, più la possibilità che non si fermi all'angolo stabilito è maggiore
