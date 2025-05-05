@@ -41,6 +41,7 @@ void scarica();
 void posiziona(int numero_blocchi);
 float converti(int angolo);
 void interrompiTutto();
+void interrompi();
 void killer();
 
 // PINS
@@ -50,6 +51,7 @@ void killer();
 #define LED 8          // LED pin
 
 int blocchi_raccolti = 0;
+unsigned long tempo_inizio = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -64,36 +66,39 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED, OUTPUT);
 
-  digitalWrite(ferma_servo, LOW);  
-  posiziona_L();
+  digitalWrite(ferma_servo, LOW);
+  //apri_L();
+  chiudi_L();
+  //posiziona_L();
   digitalWrite(ferma_servo, HIGH);  // Servo spento
 
   digitalWrite(LED, LOW);
-  delay(1000);
+
+  robot.set();
 }
 
-
 void loop() {
+    
   String comando = ricevi();
   //String comando = "j";
 
   if (comando == "j") {
-    robot.set(); // inizializza stepper e giroscopio
-
+    
     while (true) {
       blink(LED);
       if (digitalRead(kfcaperto) == HIGH) {
-
         tempo_inizio = millis();
-        
+        robot.set();  // inizializza stepper e giroscopio
+
         inizio();
-        robot.vai(1000, 2000, "avanti", "on");
-        //avanza(1000);
+        //robot.vai(1000, 2000, "avanti", "on");
+        avanza(1000);
         gira1();
-        robot.vai(900, 2000, "avanti", "on");
+        //robot.vai(900, 2000, "avanti", "on");
+        avanza(900);
         gira2();
 
-        while (true) {} // interrompi programma
+        while (true) {}  // interrompi programma
       }
     }
   }

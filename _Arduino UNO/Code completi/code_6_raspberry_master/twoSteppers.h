@@ -2,7 +2,7 @@
 #define TWO_STEPPER_H
 
 //#define NO_GIROSCOPIO
-#define GIROSCOPIO
+#define NO_GIROSCOPIO
 bool giroscopio_attivo = true;  // Variabile di stato che abilita le funzioni con il giroscopio
                                 // Se il giroscopio fallisce il codice procede lo stesso senza il giroscopio
 
@@ -17,15 +17,15 @@ bool giroscopio_attivo = true;  // Variabile di stato che abilita le funzioni co
 #define micropassi 4       // micropassi per ogni passo
 #define numeroPassi 200    // Passi interi per giro
 #define diametroRuote 63   // Diametro ruote in mm
-#define distanzaRuote 178  // Distanza tra le ruote in mm
+#define distanzaRuote 173  // Distanza tra le ruote in mm
 #define durata 208000      // Durata gara in millis
 // Fattore contatore numero passi tra due rilevazioni dell'angolo
 const int K_volte_misura_angolo = 50;  // Più è grande, più la possibilità che non si fermi all'angolo stabilito è maggiore
                                        // Più è piccolo, più la possibiltà che rilevi misure "false" è maggiore
-const float K_angolo = 1; // 0.9865f;        // Fattore di correzione per calcolo angolo
-const float incertezza = 0.4;
+const float K_angolo = 0.9865f;        // Fattore di correzione per calcolo angolo
 const int K_accelerazione = 4;         // Fattore incremento accelerazione
 const int delayAcc = 0;
+
 
 // ===================================================================
 // ==============          PINS LED - STEPPER        =================
@@ -69,13 +69,13 @@ uint16_t fifoCount;      // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64];  // FIFO storage buffer
 
 // orientation/motion vars
-Quaternion q;  // [w, x, y, z]         quaternion container
-//VectorInt16 aa;       // [x, y, z]            accel sensor measurements
-//VectorInt16 aaReal;   // [x, y, z]            gravity-free accel sensor measurements
-//VectorInt16 aaWorld;  // [x, y, z]            world-frame accel sensor measurements
+Quaternion q;         // [w, x, y, z]         quaternion container
+VectorInt16 aa;       // [x, y, z]            accel sensor measurements
+VectorInt16 aaReal;   // [x, y, z]            gravity-free accel sensor measurements
+VectorInt16 aaWorld;  // [x, y, z]            world-frame accel sensor measurements
 VectorFloat gravity;  // [x, y, z]            gravity vector
-//float euler[3];       // [psi, theta, phi]    Euler angle container
-float ypr[3];  // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+float euler[3];       // [psi, theta, phi]    Euler angle container
+float ypr[3];         // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 // Girscopio
 MPU6050 mpu;
@@ -90,11 +90,8 @@ float previousError = 0, integral = 0;
 int velocita = 0;
 // Contatore misura angolo
 int contatore = 0;
-//ogni quanti microstep controlla angolo
-int freq = 2;
 // angolo misurato dal giroscopio
 float angoloMisura = 0.0f;
-const int campioni = 1000;
 
 // packet structure for InvenSense teapot demo
 uint8_t teapotPacket[14] = { '$', 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0x00, 0x00, '\r', '\n' };
@@ -113,36 +110,14 @@ void rilevaAngolo() {
     Serial.println("impallato");
     return;
   }
-
-  if (mpuInterrupt) {
-    mpuInterrupt = false;
-
-    mpuIntStatus = mpu.getIntStatus();
-
-    // Controlla overflow FIFO
-    fifoCount = mpu.getFIFOCount();
-    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
-      // FIFO overflow
-      mpu.resetFIFO();
-      //Serial.println(F("⚠️ FIFO overflow!"));
-      return;
-    }
-
-    // Dati disponibili?
-    if (mpuIntStatus & 0x02) {
-      while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-
-      mpu.getFIFOBytes(fifoBuffer, packetSize);
-      fifoCount -= packetSize;
-
-      // Estrazione yaw, pitch, roll
-      mpu.dmpGetQuaternion(&q, fifoBuffer);
-      mpu.dmpGetGravity(&gravity, &q);
-      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-
-      angoloMisura = ypr[0] * 180 / M_PI;
-      Serial.println(angoloMisura);
-    }
+  // read a packet from FIFO
+  if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {  // Get the Latest packet
+    // display Euler angles in degrees
+    mpu.dmpGetQuaternion(&q, fifoBuffer);
+    mpu.dmpGetEuler(euler, &q);
+    // Serial.print("euler\t");
+    Serial.println(euler[0] * 180 / M_PI);
+    angoloMisura = float(euler[0] * 180 / M_PI);
   }
 }
 
@@ -155,11 +130,11 @@ float PIDControl(float setpoint, float input) {
 }
 #endif
 
-int tempo_inizio = 0;
+unsigned long tempo_start = 0;
 
 // Funzione di interruzione
 void interrompi() {
-  if (millis() - tempo_inizio >= durata) {
+  if (millis() - tempo_start >= durata) {
     Serial.println("finito");
     while (true) {
     }
@@ -192,14 +167,14 @@ Robot::Robot() {}
 
 #ifdef GIROSCOPIO
 void Robot::set() {
+  tempo_start = millis();
   stepperDX.setMaxSpeed(4000.0);
   stepperSX.setMaxSpeed(4000.0);
 
-  Wire.begin();
   // initialize device
   //Serial.println(F("Initializing I2C devices..."));
   mpu.initialize();
-  //pinMode(INTERRUPT_PIN, INPUT);
+  pinMode(INTERRUPT_PIN, INPUT);
 
   // verify connection
   //Serial.println(F("Testing device connections..."));
@@ -213,41 +188,11 @@ void Robot::set() {
   //Serial.println(F("Initializing DMP..."));
   devStatus = mpu.dmpInitialize();
 
-  // Calibrazione (opzionale)
-  // Variabili per somma
-  long ax_sum = 0, ay_sum = 0, az_sum = 0;
-  long gx_sum = 0, gy_sum = 0, gz_sum = 0;
-
-  // Letture multiple
-  for (int i = 0; i < campioni; i++) {
-    int16_t ax, ay, az, gx, gy, gz;
-    mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-
-    ax_sum += ax;
-    ay_sum += ay;
-    az_sum += az - 16384;  // sottrai 1g su Z
-    gx_sum += gx;
-    gy_sum += gy;
-    gz_sum += gz;
-
-    delay(2);  // 500 Hz
-  }
-
-  // Media
-  int ax_offset = -ax_sum / campioni;
-  int ay_offset = -ay_sum / campioni;
-  int az_offset = -az_sum / campioni;
-  int gx_offset = -gx_sum / campioni;
-  int gy_offset = -gy_sum / campioni;
-  int gz_offset = -gz_sum / campioni;
-
-  // Applica offset
-  mpu.setXAccelOffset(ax_offset);
-  mpu.setYAccelOffset(ay_offset);
-  mpu.setZAccelOffset(az_offset);
-  mpu.setXGyroOffset(gx_offset);
-  mpu.setYGyroOffset(gy_offset);
-  mpu.setZGyroOffset(gz_offset);
+  // supply your own gyro offsets here, scaled for min sensitivity
+  mpu.setXGyroOffset(220);
+  mpu.setYGyroOffset(76);
+  mpu.setZGyroOffset(-85);
+  mpu.setZAccelOffset(1788);  // 1688 factory default for my test chip
 
   // make sure it worked (returns 0 if so)
   if (devStatus == 0) {
@@ -398,9 +343,9 @@ void Robot::gira(int angoloGradi, int rpm, String perno) {
     }
 
     // angoloMisura = angolo misurato dal giroscipio
-    while (angoloMisura < (ampiezzaAngolo - incertezza) || angoloMisura > (ampiezzaAngolo + incertezza)) {
+    while (angoloMisura < (ampiezzaAngolo - 0.4) || angoloMisura > (ampiezzaAngolo + 0.4)) {
       interrompi();
-      if (contatore > freq) {
+      if (contatore > 2) {
         rilevaAngolo();
         contatore = 0;
       }
@@ -410,22 +355,22 @@ void Robot::gira(int angoloGradi, int rpm, String perno) {
 
         if (angoloGradi > 0) {
           stepperSX.moveTo(1);
-          stepperSX.setSpeed(-rpm * 2);
+          stepperSX.setSpeed(-rpm*2);
           stepperSX.runSpeed();
         } else {
           stepperSX.moveTo(1);
-          stepperSX.setSpeed(rpm * 2);
+          stepperSX.setSpeed(rpm*2);
           stepperSX.runSpeed();
         }
       } else if (perno == "sinistra") {
 
         if (angoloGradi > 0) {
           stepperDX.moveTo(1);
-          stepperDX.setSpeed(-rpm * 2);
+          stepperDX.setSpeed(-rpm*2);
           stepperDX.runSpeed();
         } else {
           stepperDX.moveTo(1);
-          stepperDX.setSpeed(rpm * 2);
+          stepperDX.setSpeed(rpm*2);
           stepperDX.runSpeed();
         }
       }
@@ -544,12 +489,8 @@ void Robot::giraRuote(int angoloGradi, int rpm) {
 
     Serial.println(ampiezzaAngolo);
     // angoloMisura = angolo misurato dal giroscipio
-    while (angoloMisura < (ampiezzaAngolo - incertezza) || angoloMisura > (ampiezzaAngolo + incertezza)) {
-      if (contatore > freq) {
-        rilevaAngolo();
-        contatore = 0;
-      }
-      contatore++;
+    while (angoloMisura < (ampiezzaAngolo - 0.4) || angoloMisura > (ampiezzaAngolo + 0.4)) {
+      rilevaAngolo();
       stepperDX.moveTo(1);
       stepperSX.moveTo(1);
       stepperDX.setSpeed(rpm);

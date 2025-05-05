@@ -66,10 +66,16 @@ void setup() {
   digitalWrite(ferma_servo, HIGH);  // Servo spento
   digitalWrite(LED, LOW);
   delay(1000);
+
 }
 
 
 void loop() {
+ 
+  robot.gira(90, 1000, "destra");
+  delay(5000);
+
+/*
   String comando = ricevi();
   //String comando = "j";
 
@@ -79,6 +85,8 @@ void loop() {
     while (true) {
       blink(LED);
       if (digitalRead(kfcaperto) == HIGH) {
+
+        tempo_inizio = millis();
         
         inizio();
         robot.vai(1000, 2000, "avanti", "on");
@@ -90,5 +98,5 @@ void loop() {
         while (true) {} // interrompi programma
       }
     }
-  }
+  }*/
 }

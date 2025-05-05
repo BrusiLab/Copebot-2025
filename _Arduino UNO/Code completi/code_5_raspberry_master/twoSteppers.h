@@ -116,7 +116,7 @@ void rilevaAngolo() {
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetEuler(euler, &q);
     // Serial.print("euler\t");
-    // Serial.println(euler[0] * 180 / M_PI);
+    Serial.println(euler[0] * 180 / M_PI);
     angoloMisura = float(euler[0] * 180 / M_PI);
   }
 }
