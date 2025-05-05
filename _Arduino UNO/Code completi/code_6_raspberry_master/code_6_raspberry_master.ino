@@ -74,7 +74,7 @@ void setup() {
 
   digitalWrite(LED, LOW);
 
-  robot.set();
+  //robot.set();
 }
 
 void loop() {
