@@ -19,12 +19,12 @@ Lidar::Lidar() {}
 
 int Lidar::misura(){
 
-  tempo = pulseIn(pinlidar, HIGH); //rileva tempo di volo
+  tempo = pulseIn(pinlidar, HIGH);    //rileva tempo di volo
   
   if(tempo > 1850 || tempo == 0){     //se intervallo non è ragionevole (1400)
     distanza = 100;
   } else {                            //se intervallo ragionevole
-    distanza = (tempo - 1000) * 1/4;  //calcola la distanza (3/4)
+    distanza = (tempo - 1330) * 4/5;  //calcola la distanza (3/4)
     distanza = distanza/10;           //distanza in cm
   }
 

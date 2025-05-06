@@ -52,33 +52,32 @@ void avanza(int distanzaAvanza) {
 
   while (distanzaPercorsa <= distanzaAvanza) {
 
-    robot.vai(100, velocitaBassa, "avanti", "off");
-    distanzaPercorsa += 100;
-
-    delay(1000);
+    robot.vai(10, velocitaBassa, "avanti", "off");
+    distanzaPercorsa += 10;
 
     int misuraCM = lidar.misura();
+    //Serial.println(misuraCM);
 
-    if (misuraCM < 14) {
+    if (misuraCM <= 15) {
 
-      robot.vai(30, velocitaBassa, "avanti", "off");  // distanza per portare la fotocamera in posizione
-      distanzaPercorsa += 30;
+      robot.vai(25, velocitaBassa, "avanti", "off");  // distanza per portare la fotocamera in posizione
+      distanzaPercorsa += 25;
 
       invia("rileva");
       String colore = ricevi();
+      invia("0");
 
-      if(colore != "r" || colore != "g"){
-        blink(LED);
-      } else if (colore == "r" || colore == "g") {
+      if (colore == "r" || colore == "g") {
         digitalWrite(LED, HIGH);
         //invia("nothing");
-        raccogli();
+        //raccogli();
+        delay(1000);
         digitalWrite(LED, LOW);
         delay(50);
       }
 
-      robot.vai(40, velocitaBassa, "avanti", "off");
-      distanzaPercorsa += 40;
+      robot.vai(45, velocitaBassa, "avanti", "off");
+      distanzaPercorsa += 45;
     }
     //torna su
   }

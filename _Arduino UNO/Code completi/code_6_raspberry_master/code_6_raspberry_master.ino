@@ -79,18 +79,22 @@ void setup() {
 
 void loop() {
   //UMCM
-
+  
   String comando = ricevi();
-  //String comando = "j";
 
   if (comando == "j") {
 
     while (true) {
       blink(LED);
       if (digitalRead(kfcaperto) == HIGH) {
+        
         tempo_inizio = millis();
+        digitalWrite(LED, LOW);
         robot.set();  // inizializza stepper e giroscopio
 
+        avanza(1000);
+
+        /*
         inizio();
         //robot.vai(1000, 2000, "avanti", "on");
         avanza(1000);
@@ -98,6 +102,7 @@ void loop() {
         //robot.vai(900, 2000, "avanti", "on");
         avanza(900);
         gira2();
+        */
 
         while (true) {}  // interrompi programma
       }

@@ -42,7 +42,7 @@ void apri_L() {
 
   tempoServo = millis();
 
-  while (digitalRead(kfcaperto) == LOW || millis() - tempoServo < 3000) {  //finché non arrivi in fondo apri L
+  while (millis() - tempoServo < 2700) {  //finché non arrivi in fondo apri L
     servo.setPWM(servo_L, 0, orario);
   }
 
@@ -56,7 +56,7 @@ void chiudi_L() {
 
   tempoServo = millis();
 
-  while (digitalRead(kfcchiuso) == LOW || millis() - tempoServo < 3000) {  //finché non arrivi in fondo chiudi L
+  while (millis() - tempoServo < 2700) {  //finché non arrivi in fondo chiudi L
     servo.setPWM(servo_L, 0, antiorario);
   }
   servo.setPWM(servo_L, 0, fermo);  //ferma il servo sbloccato
@@ -80,7 +80,7 @@ void posiziona_L() {
 
 void chiudi_leva() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
-  for (int h = aperto_inclinatore; h >= chiuso; h--) {
+  for (int h = aperto_inclinatore; h >= 250; h--) {
     servo.setPWM(servo_inclinatore, 0, h);
     delay(2);
   }
@@ -90,7 +90,7 @@ void chiudi_leva() {
 
 void apri_leva() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
-  for (int k = chiuso; k <= aperto_inclinatore; k++) {
+  for (int k = 250; k <= aperto_inclinatore; k++) {
     servo.setPWM(servo_inclinatore, 0, k);
     delay(2);
   }
@@ -113,7 +113,7 @@ void scarica() {
 
   for (i = 300; i <= 630; i++) {
     servo.setPWM(servo_ruota, 0, i);  //chiudi ruota
-    delay(2);
+    delay(4);
   }
 
   for (i = 200; i <= retto; i++) {
@@ -124,24 +124,24 @@ void scarica() {
   blocchi_raccolti = 0;
   delay(500);
 
-  //digitalWrite(ferma_servo, HIGH);  //blocca corrente
+  digitalWrite(ferma_servo, HIGH);  //blocca corrente
 }
 
 void posiziona(int numero_blocchi) {
   digitalWrite(ferma_servo, LOW);
 
   if (numero_blocchi <= 3) {
-    for (i = 650; i >= 550; i--) {
+    for (i = 630; i >= 550; i--) {
       servo.setPWM(servo_ruota, 0, i);  //scarica
       delay(5);
     }
-    for (i = 550; i <= 650; i++) {
+    for (i = 550; i <= 630; i++) {
       servo.setPWM(servo_ruota, 0, i);  //chiudi ruota
       delay(5);
     }
   }
 
-  //digitalWrite(ferma_servo, HIGH);
+  digitalWrite(ferma_servo, HIGH);
 }
 
 /*
