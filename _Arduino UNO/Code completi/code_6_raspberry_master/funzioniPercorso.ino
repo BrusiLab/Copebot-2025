@@ -7,7 +7,7 @@ unsigned int avanzaCM = 0;
 // Funzione di interruzione
 void interrompiTutto() {
   if (millis() - tempo_inizio >= durata) {
-    Serial.println("finito");
+    //Serial.println("finito");
     while (true) {
     }
   }
@@ -57,12 +57,12 @@ void avanza(int distanzaAvanza) {
 
     delay(1000);
 
-    //int misuraCM = lidar.misura();
+    int misuraCM = lidar.misura();
 
-    //if (misuraCM < 7) {
+    if (misuraCM < 14) {
 
-      //robot.vai(20, velocitaBassa, "indietro", "off");  // distanza per portare la fotocamera in posizione
-      //distanzaPercorsa -= 20;
+      robot.vai(30, velocitaBassa, "avanti", "off");  // distanza per portare la fotocamera in posizione
+      distanzaPercorsa += 30;
 
       invia("rileva");
       String colore = ricevi();
@@ -77,13 +77,12 @@ void avanza(int distanzaAvanza) {
         delay(50);
       }
 
-      //robot.vai(80, velocitaBassa, "avanti", "off");
-      //distanzaPercorsa += 80;
-    //}
+      robot.vai(40, velocitaBassa, "avanti", "off");
+      distanzaPercorsa += 40;
+    }
     //torna su
   }
 }
-
 
 void gira1() {  //al termina del primo avanza, scarica sulla prima postazione rossa e porta il robot in posizione per il secondo avanza
   robot.vai(300, velocitaMedia, "avanti", "off");
@@ -120,6 +119,7 @@ void gira2() {  //al termine del secondo avanza, scarica sulle altre due postazi
 void killer() {
   robot.vai(50, velocitaBassa, "avanti", "off");
   //LETTURA FAKE
+  //UMCM
   robot.vai(250, velocitaBassa, "avanti", "on");
   delay(50000);
   robot.vai(300, velocitaBassa, "indietro", "on");

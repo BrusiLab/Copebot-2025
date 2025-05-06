@@ -101,24 +101,24 @@ void apri_leva() {
 void scarica() {
   digitalWrite(ferma_servo, LOW);  //blocca corrente
 
-  for (i = chiuso; i <= retto; i++) {
+  for (i = retto; i >= 200; i--) {
     servo.setPWM(servo_bodyguard, 0, i);  //apri paratia
+    delay(5);
+  }
+
+  for (i = 630; i >= 300; i--) {
+    servo.setPWM(servo_ruota, 0, i);  //scarica
     delay(2);
   }
 
-  for (i = 650; i >= 300; i--) {
-    servo.setPWM(servo_ruota, 0, i);  //scarica
-    delay(8);
-  }
-
-  for (i = 300; i <= 650; i++) {
+  for (i = 300; i <= 630; i++) {
     servo.setPWM(servo_ruota, 0, i);  //chiudi ruota
     delay(2);
   }
 
-  for (i = retto; i >= chiuso; i--) {
+  for (i = 200; i <= retto; i++) {
     servo.setPWM(servo_bodyguard, 0, i);  //chiudi paratia
-    delay(2);
+    delay(5);
   }
 
   blocchi_raccolti = 0;
@@ -138,7 +138,7 @@ void posiziona(int numero_blocchi) {
     for (i = 550; i <= 650; i++) {
       servo.setPWM(servo_ruota, 0, i);  //chiudi ruota
       delay(5);
-    };
+    }
   }
 
   //digitalWrite(ferma_servo, HIGH);

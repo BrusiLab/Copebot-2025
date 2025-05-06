@@ -107,7 +107,7 @@ void dmpDataReady() {
 
 void rilevaAngolo() {
   if (!dmpReady) {
-    Serial.println("impallato");
+    //Serial.println("impallato");
     return;
   }
   // read a packet from FIFO
@@ -116,7 +116,7 @@ void rilevaAngolo() {
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetEuler(euler, &q);
     // Serial.print("euler\t");
-    Serial.println(euler[0] * 180 / M_PI);
+    // Serial.println(euler[0] * 180 / M_PI);
     angoloMisura = float(euler[0] * 180 / M_PI);
   }
 }
@@ -135,7 +135,7 @@ unsigned long tempo_start = 0;
 // Funzione di interruzione
 void interrompi() {
   if (millis() - tempo_start >= durata) {
-    Serial.println("finito");
+    // Serial.println("finito");
     while (true) {
     }
   }
@@ -487,7 +487,7 @@ void Robot::giraRuote(int angoloGradi, int rpm) {
       rpm = -rpm;
     }
 
-    Serial.println(ampiezzaAngolo);
+    // Serial.println(ampiezzaAngolo);
     // angoloMisura = angolo misurato dal giroscipio
     while (angoloMisura < (ampiezzaAngolo - 0.4) || angoloMisura > (ampiezzaAngolo + 0.4)) {
       rilevaAngolo();

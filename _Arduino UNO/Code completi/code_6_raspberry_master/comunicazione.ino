@@ -10,6 +10,7 @@ String ricevi() {
   return data;
 }
 
+//UMCM
 
 void invia(String line) {
   Serial.println(line);  // Invia il messaggio a Raspberry Pi

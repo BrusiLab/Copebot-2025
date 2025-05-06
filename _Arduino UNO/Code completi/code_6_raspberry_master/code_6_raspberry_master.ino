@@ -68,7 +68,7 @@ void setup() {
 
   digitalWrite(ferma_servo, LOW);
   //apri_L();
-  chiudi_L();
+  //chiudi_L();
   //posiziona_L();
   digitalWrite(ferma_servo, HIGH);  // Servo spento
 
@@ -78,12 +78,13 @@ void setup() {
 }
 
 void loop() {
-    
+  //UMCM
+
   String comando = ricevi();
   //String comando = "j";
 
   if (comando == "j") {
-    
+
     while (true) {
       blink(LED);
       if (digitalRead(kfcaperto) == HIGH) {
