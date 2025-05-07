@@ -66,11 +66,11 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED, OUTPUT);
 
-  digitalWrite(ferma_servo, LOW);
+  //digitalWrite(ferma_servo, LOW);
   //apri_L();
   //chiudi_L();
   //posiziona_L();
-  digitalWrite(ferma_servo, HIGH);  // Servo spento
+  //digitalWrite(ferma_servo, HIGH);  // Servo spento
 
   digitalWrite(LED, LOW);
 
@@ -79,7 +79,7 @@ void setup() {
 
 void loop() {
   //UMCM
-  
+
   String comando = ricevi();
 
   if (comando == "j") {
@@ -87,14 +87,12 @@ void loop() {
     while (true) {
       blink(LED);
       if (digitalRead(kfcaperto) == HIGH) {
-        
+
         tempo_inizio = millis();
         digitalWrite(LED, LOW);
+
         robot.set();  // inizializza stepper e giroscopio
 
-        avanza(1000);
-
-        /*
         inizio();
         //robot.vai(1000, 2000, "avanti", "on");
         avanza(1000);
@@ -102,7 +100,6 @@ void loop() {
         //robot.vai(900, 2000, "avanti", "on");
         avanza(900);
         gira2();
-        */
 
         while (true) {}  // interrompi programma
       }

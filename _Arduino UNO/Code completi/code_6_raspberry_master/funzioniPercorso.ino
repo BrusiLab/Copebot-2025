@@ -1,7 +1,7 @@
 #define velocitaBassa 300  //non meno di 300
-#define velocitaAlta 2000  //usata dovunque si può usare (e non solo), MASSIMA 2500
-#define velocitaMedia 1200
-#define velocitaGiro 900  //meno di 1000
+#define velocitaAlta 1500  //usata dovunque si può usare (e non solo), MASSIMA 2500
+#define velocitaMedia 1000
+#define velocitaGiro 300  //meno di 1000
 unsigned int avanzaCM = 0;
 
 // Funzione di interruzione
@@ -16,34 +16,35 @@ void interrompiTutto() {
 void raccogli() {
   delay(100);
   apri_leva();
-  delay(100);
+  delay(500);
   apri_L();
-  delay(100);
+  delay(1000);
   robot.vai(100, velocitaBassa, "avanti", "off");
-  delay(100);
+  delay(500);
   chiudi_leva();
-  delay(100);
+  delay(500);
   chiudi_L();
-  delay(100);
+  delay(500);
   apri_leva();
-  delay(100);
+  delay(500);
   blocchi_raccolti++;
   posiziona(blocchi_raccolti);
+  robot.vai(100, velocitaBassa, "indietro", "off");
 }
 
 void inizio() {
   delay(500);
-  robot.vai(50, velocitaBassa, "avanti", "off");
+  robot.vai(100, velocitaBassa, "avanti", "off");
 
   //LETTURA REAL
   invia("rileva");
   String colore = ricevi();
 
-  robot.vai(250, velocitaAlta, "avanti", "on");
+  robot.vai(200, velocitaAlta, "avanti", "on");
   robot.gira(90, velocitaGiro, "destra");
-  robot.vai(870, velocitaAlta, "avanti", "on");
+  robot.vai(810, velocitaAlta, "avanti", "on");
   robot.giraRuote(-90, velocitaGiro);
-  robot.vai(480, velocitaAlta, "avanti", "on"); //360
+  robot.vai(380, velocitaMedia, "avanti", "on");  //360
 }
 
 
@@ -55,38 +56,45 @@ void avanza(int distanzaAvanza) {
     robot.vai(10, velocitaBassa, "avanti", "off");
     distanzaPercorsa += 10;
 
-    int misuraCM = lidar.misura();
-    //Serial.println(misuraCM);
+    if (blocchi_raccolti < 5) {
+      
+      int misuraCM = lidar.misura();
+      //Serial.println(misuraCM);
 
-    if (misuraCM <= 15) {
+      if (misuraCM <= 10) {
 
-      robot.vai(25, velocitaBassa, "avanti", "off");  // distanza per portare la fotocamera in posizione
-      distanzaPercorsa += 25;
+        delay(100);
 
-      invia("rileva");
-      String colore = ricevi();
-      invia("0");
+        robot.vai(40, velocitaBassa, "avanti", "off");  // distanza per portare la fotocamera in posizione
+        distanzaPercorsa += 40;
 
-      if (colore == "r" || colore == "g") {
-        digitalWrite(LED, HIGH);
-        //invia("nothing");
-        //raccogli();
-        delay(1000);
-        digitalWrite(LED, LOW);
-        delay(50);
+        delay(100);
+
+        invia("rileva");
+        String colore = ricevi();
+        invia("0");
+
+        if (colore == "r" || colore == "g") {
+          digitalWrite(LED, HIGH);
+          raccogli();
+          digitalWrite(LED, LOW);
+          delay(50);
+        }
+
+        colore = "n";
+
+        robot.vai(40, velocitaBassa, "avanti", "off");
+        distanzaPercorsa += 40;
       }
-
-      robot.vai(45, velocitaBassa, "avanti", "off");
-      distanzaPercorsa += 45;
     }
     //torna su
   }
 }
 
 void gira1() {  //al termina del primo avanza, scarica sulla prima postazione rossa e porta il robot in posizione per il secondo avanza
-  robot.vai(300, velocitaMedia, "avanti", "off");
+  robot.vai(400, velocitaMedia, "avanti", "off");
   robot.giraRuote(90, velocitaGiro);
-  robot.vai(120, velocitaMedia, "avanti", "off");
+  robot.vai(180, velocitaMedia, "avanti", "off");
   robot.gira(-90, velocitaGiro, "sinistra");
   scarica();  //SCARICA
   //delay(2000);
