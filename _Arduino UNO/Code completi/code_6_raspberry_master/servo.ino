@@ -10,10 +10,13 @@
 #define aperto 650  //180
 
 // Servo indirizzi
-#define servo_L 0            //pos servo sbloccato che raccoglie blocchi
+#define servo_L 4            //pos servo sbloccato che raccoglie blocchi
 #define servo_ruota 1        //pos servo che sposta blocchi
 #define servo_bodyguard 2    //pos servo che contiene blocchi
 #define servo_inclinatore 3  //pin servo piccolo che inclina blocchi
+
+#define tempo_L 2000
+#define ferma_L 10           // togli corrente a L
 
 long t0 = 0;
 float gradi = 0;
@@ -38,29 +41,33 @@ float converti(int angolo) {
 unsigned long tempoServo = 0;
 
 void apri_L() {
-  digitalWrite(ferma_servo, LOW);  //attiva corrente
+  digitalWrite(ferma_servo, LOW);
+  digitalWrite(ferma_L, HIGH);  //attiva corrente
 
   tempoServo = millis();
 
-  while (millis() - tempoServo < 2800) {  //finché non arrivi in fondo apri L
+  while(millis() - tempoServo < tempo_L){
     servo.setPWM(servo_L, 0, orario);
   }
 
   //servo.setPWM(servo_L, 0, fermo);  //ferma il servo sbloccato
-  digitalWrite(ferma_servo, HIGH);  //blocca corrente
+  digitalWrite(ferma_L, LOW);  //blocca corrente
+  digitalWrite(ferma_servo, HIGH);
 }
 
 void chiudi_L() {
-  digitalWrite(ferma_servo, LOW);  //attiva corrente
+  digitalWrite(ferma_servo, LOW);
+  digitalWrite(ferma_L, HIGH);  //attiva corrente
 
   tempoServo = millis();
-
-  while (millis() - tempoServo < 2800) {  //finché non arrivi in fondo chiudi L
+  
+  while(millis() - tempoServo < tempo_L){
     servo.setPWM(servo_L, 0, antiorario);
   }
-  //servo.setPWM(servo_L, 0, fermo);  //ferma il servo sbloccato
 
-  digitalWrite(ferma_servo, HIGH);  //blocca corrente
+  //servo.setPWM(servo_L, 0, fermo);  //ferma il servo sbloccato
+  digitalWrite(ferma_L, LOW);  //blocca corrente
+  digitalWrite(ferma_servo, HIGH);
 }
 
 /*
@@ -79,7 +86,8 @@ void posiziona_L() {
 */
 
 void chiudi_leva() {
-  digitalWrite(ferma_servo, HIGH);  //blocca corrente
+  
+  digitalWrite(ferma_servo, LOW);  //blocca corrente
   for (int h = aperto_inclinatore; h >= 250; h--) {
     servo.setPWM(servo_inclinatore, 0, h);
     delay(2);
@@ -88,7 +96,7 @@ void chiudi_leva() {
 }
 
 void apri_leva() {
-  digitalWrite(ferma_servo, HIGH);  //blocca corrente
+  digitalWrite(ferma_servo, LOW);  //blocca corrente
   for (int k = 250; k <= aperto_inclinatore; k++) {
     servo.setPWM(servo_inclinatore, 0, k);
     delay(2);
@@ -104,12 +112,12 @@ void scarica() {
     delay(5);
   }
 
-  for (i = 630; i >= 300; i--) {
+  for (i = 650; i >= 300; i--) {
     servo.setPWM(servo_ruota, 0, i);  //scarica
     delay(4);
   }
 
-  for (i = 300; i <= 630; i++) {
+  for (i = 300; i <= 650; i++) {
     servo.setPWM(servo_ruota, 0, i);  //chiudi ruota
     delay(4);
   }
@@ -129,11 +137,11 @@ void posiziona(int numero_blocchi) {
   digitalWrite(ferma_servo, LOW);
 
   if (numero_blocchi <= 3) {
-    for (i = 630; i >= 550; i--) {
+    for (i = 650; i >= 550; i--) {
       servo.setPWM(servo_ruota, 0, i);  //scarica
-      delay(10);
+      delay(5);
     }
-    for (i = 550; i <= 630; i++) {
+    for (i = 550; i <= 650; i++) {
       servo.setPWM(servo_ruota, 0, i);  //chiudi ruota
       delay(5);
     }

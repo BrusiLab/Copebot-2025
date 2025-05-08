@@ -1,7 +1,7 @@
 #define velocitaBassa 300  //non meno di 300
 #define velocitaAlta 1500  //usata dovunque si può usare (e non solo), MASSIMA 2500
 #define velocitaMedia 1000
-#define velocitaGiro 300  //meno di 1000
+#define velocitaGiro 200  //meno di 1000
 unsigned int avanzaCM = 0;
 
 // Funzione di interruzione
@@ -26,9 +26,10 @@ void raccogli() {
   chiudi_L();
   delay(500);
   apri_leva();
-  delay(500);
+  delay(1000);
   blocchi_raccolti++;
   posiziona(blocchi_raccolti);
+  delay(500);
   robot.vai(100, velocitaBassa, "indietro", "off");
 }
 
@@ -38,11 +39,12 @@ void inizio() {
 
   //LETTURA REAL
   invia("rileva");
+  digitalWrite(LED, LOW);
   String colore = ricevi();
 
   robot.vai(200, velocitaAlta, "avanti", "on");
   robot.gira(90, velocitaGiro, "destra");
-  robot.vai(810, velocitaAlta, "avanti", "on");
+  robot.vai(790, velocitaAlta, "avanti", "on");
   robot.giraRuote(-90, velocitaGiro);
   robot.vai(380, velocitaMedia, "avanti", "on");  //360
 }
@@ -56,7 +58,7 @@ void avanza(int distanzaAvanza) {
     robot.vai(10, velocitaBassa, "avanti", "off");
     distanzaPercorsa += 10;
 
-    if (blocchi_raccolti < 5) {
+    if (blocchi_raccolti < 4) {
       
       int misuraCM = lidar.misura();
       //Serial.println(misuraCM);

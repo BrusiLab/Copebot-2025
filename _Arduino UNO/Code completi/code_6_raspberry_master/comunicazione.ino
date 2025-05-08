@@ -24,7 +24,6 @@ void invia(String line) {
   }
 }
 
-
 void blink(int pin) {
   dt1 = millis() - tp1;
   if (dt1 > t1) {

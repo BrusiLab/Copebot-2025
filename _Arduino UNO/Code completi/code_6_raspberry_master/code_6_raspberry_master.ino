@@ -46,7 +46,6 @@ void killer();
 
 // PINS
 #define ferma_servo 7  // Interrompi corrente
-#define kfcchiuso 10   // Fine corsa per L chiusa
 #define kfcaperto 9    // Fine corsa per L aperta
 #define LED 8          // LED pin
 
@@ -61,7 +60,7 @@ void setup() {
 
   // Dichiarazione pins
   pinMode(kfcaperto, INPUT);
-  pinMode(kfcchiuso, INPUT);
+  pinMode(10, OUTPUT);
   pinMode(ferma_servo, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED, OUTPUT);
@@ -70,7 +69,7 @@ void setup() {
   //apri_L();
   //chiudi_L();
   //posiziona_L();
-  //digitalWrite(ferma_servo, HIGH);  // Servo spento
+  digitalWrite(ferma_servo, HIGH);  // Servo spento
 
   digitalWrite(LED, LOW);
 
@@ -89,7 +88,12 @@ void loop() {
       if (digitalRead(kfcaperto) == HIGH) {
 
         tempo_inizio = millis();
-        digitalWrite(LED, LOW);
+        
+        if(giroscopio_attivo == true){
+          digitalWrite(LED, HIGH);
+        } else {
+          digitalWrite(LED, LOW);
+        }
 
         robot.set();  // inizializza stepper e giroscopio
 
