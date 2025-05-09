@@ -88,14 +88,15 @@ void loop() {
       if (digitalRead(kfcaperto) == HIGH) {
 
         tempo_inizio = millis();
-        
+        invia("a");
+
+        robot.set();  // inizializza stepper e giroscopio
+
         if(giroscopio_attivo == true){
           digitalWrite(LED, HIGH);
         } else {
           digitalWrite(LED, LOW);
         }
-
-        robot.set();  // inizializza stepper e giroscopio
 
         inizio();
         //robot.vai(1000, 2000, "avanti", "on");

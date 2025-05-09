@@ -12,9 +12,12 @@ String ricevi() {
 
 //UMCM
 
+//****************************
+
 void invia(String line) {
-  Serial.println(line);  // Invia il messaggio a Raspberry Pi
+  //Serial.println(line);  // Invia il messaggio a Raspberry Pi
   while (true) {
+    Serial.println(line);
     while (Serial.available() > 0) {
       String response = Serial.readStringUntil('\n');
       if (response == "ok") {

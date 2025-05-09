@@ -1,8 +1,8 @@
 #ifndef TWO_STEPPER_H
 #define TWO_STEPPER_H
 
-#define NO_GIROSCOPIO
-//#define GIROSCOPIO
+//#define NO_GIROSCOPIO
+#define GIROSCOPIO
 bool giroscopio_attivo = true;  // Variabile di stato che abilita le funzioni con il giroscopio
                                 // Se il giroscopio fallisce il codice procede lo stesso senza il giroscopio
 
@@ -172,15 +172,10 @@ void Robot::set() {
   stepperSX.setMaxSpeed(4000.0);
 
   // initialize device
-  //Serial.println(F("Initializing I2C devices..."));
   mpu.initialize();
   pinMode(INTERRUPT_PIN, INPUT);
 
   // verify connection
-  //Serial.println(F("Testing device connections..."));
-  //Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-
-  //Serial.println(F("\nSend any character to begin DMP programming and demo: "));
 
   delay(100);  // delay di attesa per inizializzare la comunicazione con in gyro
 
@@ -201,18 +196,13 @@ void Robot::set() {
     mpu.CalibrateGyro(6);
     mpu.PrintActiveOffsets();
     // turn on the DMP, now that it's ready
-    //Serial.println(F("Enabling DMP..."));
     mpu.setDMPEnabled(true);
 
     // enable Arduino interrupt detection
-    //Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
-    //Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
-    //Serial.println(F(")..."));
     attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
     mpuIntStatus = mpu.getIntStatus();
 
     // set our DMP Ready flag so the main loop() function knows it's okay to use it
-    //Serial.println(F("DMP ready! Waiting for first interrupt..."));
     dmpReady = true;
 
     // get expected DMP packet size for later comparison
@@ -224,9 +214,6 @@ void Robot::set() {
     // 1 = initial memory load failed
     // 2 = DMP configuration updates failed
     // (if it's going to break, usually the code will be 1)
-    //Serial.print(F("------ ERRORE -------  DMP Initialization failed (code "));
-    //Serial.print(devStatus);
-    //Serial.println(F(")"));
     giroscopio_attivo = false;
     return;
   }
@@ -237,6 +224,8 @@ void Robot::set() {
 void Robot::set() {
   stepperDX.setMaxSpeed(4000.0);
   stepperSX.setMaxSpeed(4000.0);
+  giroscopio_attivo = false;
+  //Serial.print("ciao");
   return;
 }
 #endif
@@ -487,7 +476,6 @@ void Robot::giraRuote(int angoloGradi, int rpm) {
       rpm = -rpm;
     }
 
-    // Serial.println(ampiezzaAngolo);
     // angoloMisura = angolo misurato dal giroscipio
     while (angoloMisura < (ampiezzaAngolo - 0.4) || angoloMisura > (ampiezzaAngolo + 0.4)) {
       rilevaAngolo();
