@@ -1,3 +1,5 @@
+#define NUMERO_BLOCCHI_DA_RACCOGLIERE 100 //2
+
 #define velocitaBassa 300  //non meno di 300
 #define velocitaAlta 1500  //usata dovunque si può usare (e non solo), MASSIMA 2500
 #define velocitaMedia 1000
@@ -38,12 +40,13 @@ void inizio() {
   robot.vai(100, velocitaBassa, "avanti", "off");
 
   //LETTURA REAL
-  invia("rileva");
+  invia("y");
+  digitalWrite(LED, HIGH);
   String colore = ricevi();
 
   robot.vai(200, velocitaAlta, "avanti", "on");
   robot.gira(90, velocitaGiro, "destra");
-  robot.vai(810, velocitaAlta, "avanti", "on");
+  robot.vai(820, velocitaAlta, "avanti", "on");
   robot.giraRuote(-90, velocitaGiro);
   robot.vai(380, velocitaMedia, "avanti", "on");  //360
 }
@@ -52,12 +55,12 @@ void inizio() {
 void avanza(int distanzaAvanza) {
   int distanzaPercorsa = 0;
 
-  while (distanzaPercorsa <= distanzaAvanza) {
+  while (distanzaPercorsa <= distanzaAvanza) { 
 
     robot.vai(10, velocitaBassa, "avanti", "off");
     distanzaPercorsa += 10;
 
-    if (blocchi_raccolti < 4) {
+    if (blocchi_raccolti < NUMERO_BLOCCHI_DA_RACCOGLIERE) {
 
       int misuraCM = lidar.misura();
       //Serial.println(misuraCM);
@@ -71,12 +74,17 @@ void avanza(int distanzaAvanza) {
 
         delay(100);
 
-        invia("rileva");
+        digitalWrite(LED, HIGH);
+        invia("y");
+        digitalWrite(LED, LOW);
         String colore = ricevi();
+        digitalWrite(LED, HIGH);
         //invia("0");
+        //digitalWrite(LED, LOW);
 
         if (colore == "r" || colore == "g") {
           digitalWrite(LED, HIGH);
+          delay(1000);
           raccogli();
           digitalWrite(LED, LOW);
           delay(50);
@@ -93,15 +101,15 @@ void avanza(int distanzaAvanza) {
 }
 
 void gira1() {  //al termina del primo avanza, scarica sulla prima postazione rossa e porta il robot in posizione per il secondo avanza
-  robot.vai(400, velocitaMedia, "avanti", "off");
+  robot.vai(320, velocitaMedia, "avanti", "off");
   robot.giraRuote(90, velocitaGiro);
-  robot.vai(160, velocitaMedia, "avanti", "off");
+  robot.vai(150, velocitaMedia, "avanti", "off");
   robot.gira(-90, velocitaGiro, "sinistra");
   scarica();  //SCARICA
   //delay(2000);
-  robot.vai(280, velocitaAlta, "avanti", "on");
+  robot.vai(330, velocitaAlta, "avanti", "on");
   robot.giraRuote(-90, velocitaGiro);
-  robot.vai(680, velocitaAlta, "avanti", "on");
+  robot.vai(670, velocitaAlta, "avanti", "on");
   robot.gira(-90, velocitaGiro, "sinistra");
   robot.vai(200, velocitaAlta, "avanti", "on");
 }

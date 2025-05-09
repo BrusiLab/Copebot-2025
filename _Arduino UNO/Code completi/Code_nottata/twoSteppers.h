@@ -1,8 +1,8 @@
 #ifndef TWO_STEPPER_H
 #define TWO_STEPPER_H
 
-#define NO_GIROSCOPIO
-//#define GIROSCOPIO
+//#define NO_GIROSCOPIO
+#define GIROSCOPIO
 bool giroscopio_attivo = true;  // Variabile di stato che abilita le funzioni con il giroscopio
                                 // Se il giroscopio fallisce il codice procede lo stesso senza il giroscopio
 
@@ -17,18 +17,17 @@ bool giroscopio_attivo = true;  // Variabile di stato che abilita le funzioni co
 #define micropassi 4       // micropassi per ogni passo
 #define numeroPassi 200    // Passi interi per giro
 #define diametroRuote 63   // Diametro ruote in mm
-#define distanzaRuote 180  // Distanza tra le ruote in mm
+#define distanzaRuote 175  // Distanza tra le ruote in mm
 #define durata 208000      // Durata gara in millis
 // Fattore contatore numero passi tra due rilevazioni dell'angolo
 const int K_volte_misura_angolo = 50;  // Più è grande, più la possibilità che non si fermi all'angolo stabilito è maggiore
                                        // Più è piccolo, più la possibiltà che rilevi misure "false" è maggiore
 const float K_angolo = 0.9865f;        // Fattore di correzione per calcolo angolo
-const float K_ruote = 1.05;
-const float K_meno = 1.0066;
-const float K_piu_ruote = 1.015;
 const int K_accelerazione = 4;         // Fattore incremento accelerazione
 const int delayAcc = 0;
 
+const float uno = 1.060;
+const float due = 1.05;
 
 // ===================================================================
 // ==============          PINS LED - STEPPER        =================
@@ -228,7 +227,6 @@ void Robot::set() {
   stepperDX.setMaxSpeed(4000.0);
   stepperSX.setMaxSpeed(4000.0);
   giroscopio_attivo = false;
-  //Serial.print("ciao");
   return;
 }
 #endif
@@ -420,10 +418,10 @@ void Robot::gira(int angoloGradi, int rpm, String perno) {
   int statoVerso = 0;  // variabile direzionale
 
   if (angoloGradi < 0) {
-    statoVerso = 1 * K_meno;
+    statoVerso = 1 * uno;
   }
   if (angoloGradi > 0) {
-    statoVerso = -1;  // inverti la direzione
+    statoVerso = -1 * uno;  // inverti la direzione
   }
 
   if (perno == "destra") {
@@ -522,12 +520,12 @@ void Robot::giraRuote(int angoloGradi, int rpm) {
   float rad = abs(angoloGradi) * 17.45329 / 1000;
   // calcolo distanza necessaria da compiere per singola ruota
   int length = rad * distanzaRuote * 0.5;
-  unsigned long passiDaCompiere = abs(length) / (PI * diametroRuote) * numeroPassi * K_ruote;
+  unsigned long passiDaCompiere = abs(length) / (PI * diametroRuote) * numeroPassi * due;
   int direzione = 0;
   if (angoloGradi < 0) {
     direzione = 1;
   } else if (angoloGradi > 0) {
-    direzione = -1 * K_piu_ruote;
+    direzione = -1;
   }
   stepperDX.setCurrentPosition(0);
   while (abs(stepperDX.currentPosition()) <= abs(passiDaCompiere * micropassi)) {

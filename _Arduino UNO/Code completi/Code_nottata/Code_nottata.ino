@@ -78,33 +78,7 @@ void setup() {
 
 void loop() {
   //UMCM
-
-  /*
-  String comando = ricevi();
-
-  if (comando == "j") {
-
-    while (true) {
-      blink(LED);
-      if (digitalRead(kfcaperto) == HIGH) {
-
-        digitalWrite(LED, LOW);
-        
-        //tempo_inizio = millis();
-        invia("a");
-        delay(1000);
-        
-        //robot.set();
-        Serial.print("ciao");
-
-        invia("rileva");
-        digitalWrite(LED, HIGH);
-      }
-    }
-  }
-*/
-
-
+  
   String comando = ricevi();
 
   if (comando == "j") {
@@ -117,11 +91,13 @@ void loop() {
 
         robot.set();  // inizializza stepper e giroscopio
 
-        if (giroscopio_attivo == true) {
+        if(giroscopio_attivo == true){
           digitalWrite(LED, HIGH);
         } else {
           digitalWrite(LED, LOW);
         }
+
+        digitalWrite(LED, LOW);
 
         inizio();
         //robot.vai(1000, 2000, "avanti", "on");
@@ -135,34 +111,4 @@ void loop() {
       }
     }
   }
-
-  /*
-  robot.gira(90, 200, "destra");
-  robot.gira(90, 200, "destra");
-  robot.gira(90, 200, "destra");
-  robot.gira(90, 200, "destra");
-
-  delay(3000);
-
-  robot.gira(-90, 200, "sinistra");
-  robot.gira(-90, 200, "sinistra");
-  robot.gira(-90, 200, "sinistra");
-  robot.gira(-90, 200, "sinistra");
-
-  delay(3000);
-
-  robot.giraRuote(90, 200);
-  robot.giraRuote(90, 200);
-  robot.giraRuote(90, 200);
-  robot.giraRuote(90, 200);
-
-  delay(3000);
-
-  robot.giraRuote(-90, 200);
-  robot.giraRuote(-90, 200);
-  robot.giraRuote(-90, 200);
-  robot.giraRuote(-90, 200);
-
-  delay(3000);
-*/
 }

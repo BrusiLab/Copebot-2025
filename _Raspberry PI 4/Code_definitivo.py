@@ -48,9 +48,9 @@ def elabora_immagine(img0, img1):
 
    if hue_value <= 18 or hue_value >= 118 or (sat_value > 230 and value_value > 190 and hue_value < 100):
       color = b"r"
-   elif hue_value <= 58:
+   elif hue_value <= 56:
       color = b"g"
-   elif hue_value <= 85:
+   elif hue_value <= 84:
       color = b"v"
    elif hue_value < 118:
       color = b"b"
@@ -89,12 +89,12 @@ if __name__ == '__main__':
    
    send(b"j")
    
-   receive()
-   sleep(10)
-   
+   #receive()
+   #sleep(10)
    
 while True:
    
+   #msg = "o"
    msg = receive()
    print(msg)
             
