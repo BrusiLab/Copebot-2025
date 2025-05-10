@@ -4,7 +4,8 @@ unsigned long i = 0;
 
 
 String ricevi() {
-  while (Serial.available() == 0);  // Attendi che ci siano dati disponibili
+  int end = millis() + 5000;
+  while (Serial.available() == 0 || millis()<end);  // Attendi che ci siano dati disponibili
   String data = Serial.readStringUntil('\n');  // Leggi fino a '\n'
   Serial.println("ok");  // Invia conferma a Raspberry Pi
   return data;
