@@ -23,7 +23,7 @@ void invia(String line) {
       if (response == "ok") {
         return;  // Esci quando Raspberry Pi conferma la ricezione
       } else if (response =="1" && line=="ricevi") {//STARTMdB
-        for (i=0; i<10;i++) {
+        for (int count=0; count<10;count++) {
           blink(8);
         }
         return;
