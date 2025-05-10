@@ -69,7 +69,7 @@ def send(value):
          break
 
 def receive():
-   end = time()+10
+   end = time()+5
    """Riceve un messaggio da Arduino e risponde con 'ok'."""
    while time()<end:
       line = ser.readline().decode('utf-8').rstrip()
