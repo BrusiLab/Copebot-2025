@@ -22,7 +22,12 @@ void invia(String line) {
       String response = Serial.readStringUntil('\n');
       if (response == "ok") {
         return;  // Esci quando Raspberry Pi conferma la ricezione
-      }
+      } else if (response =="1" && line=="ricevi") {//STARTMdB
+        for (i=0; i<10;i++) {
+          blink(8);
+        }
+        return;
+      }//ENDMdB
     }
   }
 }
