@@ -39,10 +39,11 @@ void inizio() {
   robot.vai(100, velocitaBassa, "avanti", "off");
 
   //LETTURA REAL
-  while(status == false);
+  while(status == false) {
     invia("rileva");
     String colore = ricevi();
-
+  }
+  
   robot.vai(200, velocitaAlta, "avanti", "on");
   robot.gira(90, velocitaGiro, "destra");
   robot.vai(810, velocitaAlta, "avanti", "on");
