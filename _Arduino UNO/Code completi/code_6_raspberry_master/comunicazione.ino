@@ -16,10 +16,11 @@ String ricevi() {
 //****************************
 
 void invia(String line) {
+  int end = millis() + 10000;
   Serial.println(line);  // Invia il messaggio a Raspberry Pi
-  while (true) {
+  while (millis()<end) {
     //Serial.println(line);
-    while (Serial.available() > 0) {
+    while (Serial.available() > 0 && millis()<end) {
       String response = Serial.readStringUntil('\n');
       if (response == "ok") {
         return;  // Esci quando Raspberry Pi conferma la ricezione
