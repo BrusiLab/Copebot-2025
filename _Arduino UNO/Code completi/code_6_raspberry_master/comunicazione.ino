@@ -23,11 +23,9 @@ void invia(String line) {
     while (Serial.available() > 0 && millis()<end) {
       String response = Serial.readStringUntil('\n');
       if (response == "ok") {
+        status = true;
         return;  // Esci quando Raspberry Pi conferma la ricezione
       } else if (response =="1" && line=="ricevi") {//STARTMdB
-        for (int count=0; count<10;count++) {
-          blink(8);
-        }
         return;
       }//ENDMdB
     }
