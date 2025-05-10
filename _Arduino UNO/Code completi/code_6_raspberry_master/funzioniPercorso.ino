@@ -3,6 +3,7 @@
 #define velocitaMedia 1000
 #define velocitaGiro 500  //meno di 1000
 unsigned int avanzaCM = 0;
+bool status = false;
 
 // Funzione di interruzione
 void interrompiTutto() {
@@ -38,8 +39,9 @@ void inizio() {
   robot.vai(100, velocitaBassa, "avanti", "off");
 
   //LETTURA REAL
-  invia("rileva");
-  String colore = ricevi();
+  while(status == false);
+    invia("rileva");
+    String colore = ricevi();
 
   robot.vai(200, velocitaAlta, "avanti", "on");
   robot.gira(90, velocitaGiro, "destra");
