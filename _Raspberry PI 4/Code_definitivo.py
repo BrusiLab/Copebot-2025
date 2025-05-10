@@ -1,5 +1,5 @@
 from picamera2 import Picamera2
-from time import sleep
+from time import sleep, time
 import numpy as np 
 import cv2 
 import serial
@@ -69,13 +69,14 @@ def send(value):
          break
 
 def receive():
-   
+   end = time()+10
    """Riceve un messaggio da Arduino e risponde con 'ok'."""
-   while True:
+   while time()<end:
       line = ser.readline().decode('utf-8').rstrip()
       if line:  # Controlla se la stringa non è vuota
          ser.write(b"ok")  # Conferma la ricezione
          return line
+   ser.write(b"1")
       
 if __name__ == '__main__':
    
