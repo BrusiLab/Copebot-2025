@@ -39,10 +39,9 @@ void inizio() {
   robot.vai(100, velocitaBassa, "avanti", "off");
 
   //LETTURA REAL
-  while(status == false) {
-    invia("rileva");
-    String colore = ricevi();
-  }
+  invia("rileva");
+  String colore = ricevi();
+  
   
   robot.vai(200, velocitaAlta, "avanti", "on");
   robot.gira(90, velocitaGiro, "destra");
@@ -74,8 +73,10 @@ void avanza(int distanzaAvanza) {
 
         delay(100);
 
-        invia("rileva");
-        String colore = ricevi();
+        while(status == false) {
+          invia("rileva");
+          String colore = ricevi();
+        }
         //invia("0");
 
         if (colore == "r" || colore == "g") {
@@ -89,6 +90,7 @@ void avanza(int distanzaAvanza) {
 
         robot.vai(40, velocitaBassa, "avanti", "off");
         distanzaPercorsa += 40;
+        status = false;
       }
     }
     //torna su
