@@ -77,6 +77,7 @@ def receive():
          ser.write(b"ok")  # Conferma la ricezione
          return line
    ser.write(b"1")
+   return "fail"
       
 if __name__ == '__main__':
    
@@ -97,6 +98,7 @@ while True:
    
    #msg = "o"
    msg = receive()
+   sleep(2)
    print(msg)
             
    if msg == "y":
@@ -122,6 +124,6 @@ while True:
       
       sleep(1)
       
-      print(receive())
+      #print(receive())
       
    sleep(0.05)
