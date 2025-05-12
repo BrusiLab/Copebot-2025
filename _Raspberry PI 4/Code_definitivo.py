@@ -99,7 +99,7 @@ while True:
    msg = receive()
    print(msg)
             
-   if msg == "rileva":
+   if msg == "y":
       
       print("if")
       camera.start()              # Avvia la fotocamera
